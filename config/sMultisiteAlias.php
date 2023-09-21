@@ -1,1 +1,1 @@
-<?php return Seiger\sMultisiteAlias\Facades\sMultisiteAlias::class;
+<?php return Seiger\sMultisite\Facades\sMultisite::class;
