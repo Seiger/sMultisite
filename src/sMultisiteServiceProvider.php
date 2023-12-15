@@ -29,7 +29,7 @@ class sMultisiteServiceProvider extends ServiceProvider
             $this->publishes([
                 dirname(__DIR__) . '/config/sMultisiteAlias.php' => config_path('app/aliases/sMultisite.php', true),
                 dirname(__DIR__) . '/config/sMultisiteSettings.php' => config_path('seiger/settings/sMultisite.php', true),
-                dirname(__DIR__) . '/images/seigerit-yellow.svg' => public_path('assets/site/seigerit-yellow.svg'),
+                dirname(__DIR__) . '/images/seigerit-blue.svg' => public_path('assets/site/seigerit-blue.svg'),
             ]);
         }
 

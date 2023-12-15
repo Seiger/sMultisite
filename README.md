@@ -8,7 +8,16 @@
 [![Stars](https://img.shields.io/packagist/stars/Seiger/smultisite)](https://packagist.org/packages/seiger/smultisite)
 [![Total Downloads](https://img.shields.io/packagist/dt/seiger/smultisite)](https://packagist.org/packages/seiger/smultisite)
 
-**sMultisite** Collection of Multisite Tools for Evolution CMS.
+# Welcome to sMultisite!
+
+**sMultisite** collection of Multisite Tools for Evolution CMS.
+The sMultisite package allows you to use one Evolution CMS 
+installation for several independent sites managed from the same admin.
+
+## Features
+
+- [x] Management of several sites from one admin panel.
+- [x] Adding new domains.
 
 ## Install by artisan package installer
 
@@ -31,3 +40,5 @@ php artisan vendor:publish --provider="Seiger\sMultisite\sMultisiteServiceProvid
 ```console
 php artisan migrate
 ```
+
+[See full documentation here](https://seiger.github.io/sMultisite/)
