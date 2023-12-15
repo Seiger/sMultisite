@@ -26,6 +26,24 @@ class CreateSMultisitesTable extends Migration
             $table->integer('unauthorized_page')->default(0);
             $table->timestamps();
         });
+
+        // Seed default domain
+        $default = [
+            'active' => 1,
+            'resource' => 0,
+            'key' => 'default',
+            'domain' => get_by_key($_SERVER, 'HTTP_HOST', 'localhost'),
+            'site_name' => evo()->getConfig('site_name', 'Default'),
+            'site_start' => evo()->getConfig('site_start', 1),
+            'error_page' => evo()->getConfig('error_page', 1),
+            'unauthorized_page' => evo()->getConfig('unauthorized_page', 1),
+        ];
+
+        $item = new \Seiger\sMultisite\Models\sMultisite();
+        foreach ($default as $key => $value) {
+            $item->{$key} = $value;
+        }
+        $item->save();
     }
 
     /**

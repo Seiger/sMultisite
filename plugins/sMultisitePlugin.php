@@ -27,7 +27,7 @@ Event::listen('evolution.OnLoadSettings', function($params) {
  * Correcting urls
  */
 Event::listen('evolution.OnWebPageInit', function() {
-    $domainIds = Cache::get('domain-' . evo()->getConfig('site_key', 'default') . '-resources') ?? [];
+    $domainIds = Cache::get('sMultisite-' . evo()->getConfig('site_key', 'default') . '-resources') ?? [];
     if (!in_array(evo()->documentIdentifier, $domainIds)) {
         evo()->sendErrorPage();
     }
@@ -98,7 +98,7 @@ Event::listen('evolution.OnManagerMenuPrerender', function($params) {
 Event::listen('evolution.OnManagerTreeRender', function($params) {
     $tree = '';
     $_style = ManagerTheme::getStyle();
-    $domains = \Seiger\sMultisite\Models\sMultisite::where('hide_from_tree', 0)->get();
+    $domains = \Seiger\sMultisite\Models\sMultisite::where('hide_from_tree', 0)->whereNot('key', 'default')->get();
     if ($domains) {
         foreach ($domains as $domain) {
             $tree .= '<div id="node'.$domain->resource.'" class="rootNode" style="position:initial;">';
@@ -120,7 +120,7 @@ Event::listen('evolution.OnManagerTreeRender', function($params) {
  * Resources manipulation
  */
 Event::listen('evolution.OnManagerNodePrerender', function($params) {
-    $domains = \Seiger\sMultisite\Models\sMultisite::where('hide_from_tree', 0)->get();
+    $domains = \Seiger\sMultisite\Models\sMultisite::where('hide_from_tree', 0)->whereNot('key', 'default')->get();
     if ($domains) {
         $_style = ManagerTheme::getStyle();
         $startResources = $domains->pluck('site_start')->toArray();

@@ -5,6 +5,23 @@ use Illuminate\Support\Str;
 
 class sMultisite
 {
+    public function domains()
+    {
+        $domains = [];
+
+        $default = [
+            'key' => 'default',
+        ];
+
+        $items = \Seiger\sMultisite\Models\sMultisite::whereActive(1)->get();
+        if ($items) {
+            foreach ($items as $item) {
+                //dd($item);
+            }
+        }
+        //dd($domains);
+    }
+
     /**
      * Get url from route name
      *
@@ -20,6 +37,11 @@ class sMultisite
         return $route . '/';
     }
 
+    /**
+     * Update resiurces tree with domains
+     *
+     * @return void
+     */
     public function domainsTree()
     {
         $domains = \Seiger\sMultisite\Models\sMultisite::all();
@@ -30,7 +52,7 @@ class sMultisite
 
             foreach ($domains as $domain) {
                 $domainIds = evo()->getChildIds($domain->resource);
-                Cache::rememberForever('domain-' . $domain->key . '-resources', function () use ($domainIds) {
+                Cache::rememberForever('sMultisite-' . $domain->key . '-resources', function () use ($domainIds) {
                     return $domainIds;
                 });
             }
@@ -40,7 +62,7 @@ class sMultisite
         foreach ($domainBaseIds as $domainBaseId) {
             $domainDefaultIds = array_merge($domainDefaultIds, evo()->getChildIds($domainBaseId));
         }
-        Cache::rememberForever('domain-default-resources', function () use ($domainDefaultIds) {
+        Cache::rememberForever('sMultisite-default-resources', function () use ($domainDefaultIds) {
             return $domainDefaultIds;
         });
     }

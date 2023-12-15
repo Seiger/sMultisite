@@ -44,7 +44,7 @@ github_repo: sMultisite
 # discord: https://community.discord.com
 
 # If you have a logo, put here to include in meta tags
-logo: assets/img/sit-logo-blue.png
+logo: assets/img/logo.svg
 
 # branch to edit on GitHub
 github_branch: main

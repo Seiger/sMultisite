@@ -19,9 +19,7 @@ permalink: /
 The sMultisite package allows you to use one Evolution CMS
 installation for several independent sites managed from the same admin.
 
-> [!IMPORTANT]
->
-> To use additional domains for your site, they must be registered with your domain name registrar.
+{% include callout.html text="To use additional domains for your site, they must be registered with your domain name registrar." color="skyblue" %}
 
 [Getting Started]({{ site.baseurl }}/getting-started/){: .btn .btn-sky}
 

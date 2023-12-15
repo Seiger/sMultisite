@@ -26,3 +26,8 @@ php artisan vendor:publish --provider="Seiger\sMultisite\sMultisiteServiceProvid
 ```console
 php artisan migrate
 ```
+
+## Configuration in backend
+
+Plugin settings are located at **Admin Panel -> Tools -> sMultisite**.
+{% include figure.html path="assets/img/smultisitetools.jpg" %}
