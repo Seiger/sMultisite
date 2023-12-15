@@ -26,19 +26,3 @@ php artisan vendor:publish --provider="Seiger\sMultisite\sMultisiteServiceProvid
 ```console
 php artisan migrate
 ```
-
-## Configure layout via Blade
-
-Check if the `OnHeadWebDocumentRender` event is registered in the `<head></head>` section of your Blade layout.
-
-```html
-<!DOCTYPE html>
-<html lang="{% raw %}{{evo()->getConfig('lang', 'en')}}{% endraw %}">
-<head>
-    <base href="{% raw %}{{evo()->getConfig('site_url', '/')}}{% endraw %}"/>
-    @if(is_array($evtHead = evo()->invokeEvent('OnHeadWebDocumentRender')))
-        {!!implode('', $evtHead)!!}
-    @endif
-    ...
-</head>
-```
