@@ -5,21 +5,33 @@ use Illuminate\Support\Str;
 
 class sMultisite
 {
-    public function domains()
+    /**
+     * Show all active domains
+     *
+     * @return array
+     */
+    public function domains(): array
     {
-        $domains = [];
-
-        $default = [
+        $domains['default'] = [
             'key' => 'default',
+            'link' => evo()->getConfig('server_protocol', 'https') . '://' . $_SERVER['HTTP_HOST'],
+            'site_name' => evo()->getConfig('site_name', 'Evolution CMS'),
+            'is_current' => true,
         ];
 
         $items = \Seiger\sMultisite\Models\sMultisite::whereActive(1)->get();
         if ($items) {
             foreach ($items as $item) {
-                //dd($item);
+                $domains[$item->key] = [
+                    'key' => $item->key,
+                    'link' => evo()->getConfig('server_protocol', 'https') . '://' . $item->domain,
+                    'site_name' => $item->site_name,
+                    'is_current' => ($_SERVER['HTTP_HOST'] == $item->domain),
+                ];
             }
         }
-        //dd($domains);
+
+        return $domains;
     }
 
     /**

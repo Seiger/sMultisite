@@ -1,40 +1,13 @@
 ---
 layout: page
-title: Getting started
-description: Getting started with sMultisite
-permalink: /getting-started/
+title: Use in Blade
+description: Use sMultisite code in Blade layouts
+permalink: /use-in-blade/
 ---
 
-## Install by artisan package
+## Show all domains:
 
-Go to You /core/ folder
-
-```console
-cd core
-```
-
-Run php artisan commands
-
-```console
-php artisan package:installrequire seiger/smultisite "*"
-```
-
-```console
-php artisan vendor:publish --provider="Seiger\sMultisite\sMultisiteServiceProvider"
-```
-
-```console
-php artisan migrate
-```
-
-## Configuration in backend
-
-Plugin settings are located at **Admin Panel -> Tools -> sMultisite**.
-{% include figure.html path="assets/img/smultisitetools.jpg" %}
-
-## Configuration in frontend
-
-Show all domains in Blade layout:
+Use this example code for show all active domains:
 
 ```php
 @foreach(sMultisite::domains() as $domain)
@@ -64,6 +37,8 @@ array:2 [▼
 ]
 ```
 
-More examples in **Use in Blade** page
-
-[Getting Started]({{ site.baseurl }}/use-in-blade/){: .btn .btn-sky}
+In ths array
+ * ```key``` is a unique key for domain;
+ * ```link``` is a Domain host with protocol. Protocol configure in **Admin Panel -> System configuration -> Site -> Server type**;
+ * ```site_name``` is a Site name setting;
+ * ```is_current``` this parameter is true if Domain host equal current server hostname;
