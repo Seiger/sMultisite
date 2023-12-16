@@ -10,7 +10,8 @@ use Seiger\sMultisite\Facades\sMultisite;
 /**
  * Load start parameters
  */
-Event::listen('evolution.OnLoadSettings', function($params) {
+Event::listen('evolution.OnLoadSettings', function() {
+    evo()->setConfig('site_key', 'default');
     if (evo()->isFrontend()) {
         $domain = \Seiger\sMultisite\Models\sMultisite::whereDomain($_SERVER['HTTP_HOST'])->whereActive(1)->first();
         if ($domain) {
@@ -42,7 +43,7 @@ Event::listen('evolution.OnMakeDocUrl', function($params) {
         if (count($roots)) {
             $root = array_pop($roots);
 
-            $domainUrl = Cache::rememberForever('domain-' . $root . '-url', function () use ($root) {
+            $domainUrl = Cache::rememberForever('sMultisite-' . $root . '-url', function () use ($root) {
                 $url = '';
                 $domain = \Seiger\sMultisite\Models\sMultisite::whereResource($root)->first();
                 if ($domain) {
