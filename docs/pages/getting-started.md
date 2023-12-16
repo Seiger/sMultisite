@@ -45,7 +45,7 @@ Show all domains in Blade layout:
 @endforeach
 ```
 
-This sMultisite::domains() method returns the list of active domains as an array:
+This ```sMultisite::domains()``` method returns the list of active domains as an array:
 
 ```php
 array:2 [▼
@@ -66,4 +66,4 @@ array:2 [▼
 
 More examples in **Use in Blade** page
 
-[Getting Started]({{ site.baseurl }}/use-in-blade/){: .btn .btn-sky}
+[Use in Blade]({{ site.baseurl }}/use-in-blade/){: .btn .btn-sky}

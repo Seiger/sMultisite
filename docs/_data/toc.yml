@@ -10,3 +10,5 @@
           url: "docs/getting-started#development"
         - title: Customization
           url: "docs/getting-started#customization"
+    - title: "Use in Blade"
+      url: "use-in-blade"
