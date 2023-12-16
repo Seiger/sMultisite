@@ -37,7 +37,7 @@ array:2 [▼
 ]
 ```
 
-In ths array
+In this array:
  * ```key``` is a unique key for domain;
  * ```link``` is a Domain host with protocol. Protocol configure in **Admin Panel -> System configuration -> Site -> Server type**;
  * ```site_name``` is a Site name setting;
