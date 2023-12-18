@@ -5,7 +5,10 @@ description: Use sMultisite code in Blade layouts
 permalink: /use-in-blade/
 ---
 
-## Show all domains:
+You can use different templates for each domain.
+But if your templates are identical, you can give them features by dynamically replacing design elements.
+
+## Show all domains
 
 Use this example code for show all active domains:
 
@@ -42,3 +45,25 @@ In this array:
  * ```link``` is a Domain host with protocol. Protocol configure in **Admin Panel -> System configuration -> Site -> Server type**;
  * ```site_name``` is a Site name setting;
  * ```is_current``` this parameter is true if Domain host equal current server hostname;
+
+## Partials (Chunks)
+
+```php
+@include('partials.'.evo()->getConfig('site_key').'.header_nav')
+```
+
+## Main logo
+
+```php
+@if(evo()->documentIdentifier == evo()->getConfig('site_start'))
+    <span class="header__logo">
+@else
+    <a href="{% raw %}{{url(evo()->getConfig('site_start'), '', '', 'full')}}{% endraw %}" class="header__logo">
+@endif
+    <img src="/img/main-logo-{% raw %}{{evo()->getConfig('site_key')}}{% endraw %}.svg" alt="{% raw %}{{evo()->getConfig('site_name')}}{% endraw %} logo" />
+@if(evo()->documentIdentifier == evo()->getConfig('site_start'))
+    </span>
+@else
+    </a>
+@endif
+```

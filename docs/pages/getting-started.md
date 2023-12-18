@@ -27,6 +27,16 @@ php artisan vendor:publish --provider="Seiger\sMultisite\sMultisiteServiceProvid
 php artisan migrate
 ```
 
+## Available values
+
+```php
+$currentDomainKey = evo()->getConfig('site_key');
+$currentDomainName = evo()->getConfig('site_name');
+$currentDomainHomePage = evo()->getConfig('site_start');
+$currentDomainNotFoundPage = evo()->getConfig('error_page');
+$currentDomainUnauthorizedPage = evo()->getConfig('unauthorized_page');
+```
+
 ## Configuration in backend
 
 Plugin settings are located at **Admin Panel -> Tools -> sMultisite**.
