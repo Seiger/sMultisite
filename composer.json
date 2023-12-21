@@ -1,7 +1,7 @@
 {
     "name": "seiger/smultisite",
     "license": "GPL-3.0",
-    "type": "EvolutionCMS-Plugin",
+    "type": "EvolutionCMS-Module",
     "description": "Evocms package Multisite Tools for Evolution CMS.",
     "keywords": ["evocms", "evolution-cms", "multisite"],
     "authors": [

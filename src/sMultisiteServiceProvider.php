@@ -33,6 +33,9 @@ class sMultisiteServiceProvider extends ServiceProvider
             ]);
         }
 
+        // Check sMultisite
+        $this->mergeConfigFrom(dirname(__DIR__) . '/config/sMultisiteCheck.php', 'cms.settings');
+
         // Class alias
         $this->app->singleton(\Seiger\sMultisite\sMultisite::class);
         $this->app->alias(\Seiger\sMultisite\sMultisite::class, 'sMultisite');
