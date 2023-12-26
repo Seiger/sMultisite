@@ -39,7 +39,7 @@ $currentDomainUnauthorizedPage = evo()->getConfig('unauthorized_page');
 
 ## Configuration in backend
 
-Module settings are located at **Admin Panel -> Tools -> sMultisite**.
+Plugin settings are located at **Admin Panel -> Tools -> sMultisite**.
 {% include figure.html path="assets/img/smultisitetools.jpg" %}
 
 ## Configuration in frontend
@@ -80,7 +80,7 @@ More examples in **Use in Blade** page
 
 ## Extra
 
-If you write your own code that can integrate with the sMultisite module, you can check the presence of this module in the system through a configuration variable.
+If you write your own code that can integrate with the sMultisite plugin, you can check the presence of this module in the system through a configuration variable.
 
 ```php
 if (evo()->getConfig('check_sMultisite', false)) {
@@ -88,4 +88,4 @@ if (evo()->getConfig('check_sMultisite', false)) {
 }
 ```
 
-If the module is installed, the result of ```evo()->getConfig('check_sMultisite', false)``` will always be ```true```. Otherwise, you will get an ```false```.
+If the plugin is installed, the result of ```evo()->getConfig('check_sMultisite', false)``` will always be ```true```. Otherwise, you will get an ```false```.
