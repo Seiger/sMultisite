@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Facade;
 
+/**
+ * Class sMultisite
+ *
+ * @package Seiger\sMultisite
+ * @mixin \Seiger\sMultisite\sMultisite
+ */
 class sMultisite extends Facade
 {
     /**
