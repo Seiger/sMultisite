@@ -12,6 +12,7 @@ use Seiger\sMultisite\Facades\sMultisite;
  */
 Event::listen('evolution.OnLoadSettings', function() {
     evo()->setConfig('site_key', 'default');
+    evo()->setConfig('site_root', 0);
     if (evo()->isFrontend()) {
         $domain = \Seiger\sMultisite\Models\sMultisite::whereDomain($_SERVER['HTTP_HOST'])->whereActive(1)->first();
         if ($domain) {
@@ -20,6 +21,7 @@ Event::listen('evolution.OnLoadSettings', function() {
             evo()->setConfig('site_start', $domain->site_start);
             evo()->setConfig('error_page', $domain->error_page);
             evo()->setConfig('unauthorized_page', $domain->unauthorized_page);
+            evo()->setConfig('site_root', (int)$domain->resource);
         }
     }
 });
