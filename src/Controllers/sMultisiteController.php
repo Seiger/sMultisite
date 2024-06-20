@@ -23,6 +23,7 @@ class sMultisiteController
 
         if (request()->has('new-domains') && is_array(request()->input('new-domains', [])) && count(request()->input('new-domains', []))) {
             foreach (request()->input('new-domains', []) as $item) {
+                $item = is_array($item) ? implode('-', $item) : $item;
                 $item = trim($item, 'https://');
                 $item = trim($item, 'http://');
                 $item = trim($item, '/');
