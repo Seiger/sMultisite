@@ -1,7 +1,7 @@
 <nav aria-label="Social menu" class="hidden xl:flex w-50 h-10">
     <div class="flex space-x-3 items-center w-full z-10 bg-white text-sky-500">
         {% if site.repo %}
-        <a href="{{ site.repo }}" class="hover:text-sky-700 transition-colors">
+        <a href="{{site.repo}}" class="hover:text-sky-700 transition-colors">
             <span class=sr-only>Github</span>
             <svg role=img class=icon viewBox="0 0 24 24" style='width: 20px; height: 20px; ' fill=currentColor>
                 <g buffered-rendering=static>
@@ -11,7 +11,7 @@
         </a>
         {% endif %}
         {% if site.twitter %}
-        <a href="https://twitter.com/{{ site.twitter }}" class="hover:text-sky-700 transition-colors">
+        <a href="https://twitter.com/{{site.twitter}}" class="hover:text-sky-700 transition-colors">
             <span class=sr-only>Twitter</span>
             <svg role=img class="" viewBox="0 0 24 24" style="pointer-events: none; width: 20px; height: 20px;" fill=currentColor>
                 <g buffered-rendering=static>
@@ -21,11 +21,21 @@
         </a>
         {% endif %}
         {% if site.support %}
-        <a href="{{ site.support }}" class="hover:text-sky-700 transition-colors">
+        <a href="{{site.support}}" class="hover:text-sky-700 transition-colors">
             <span class=sr-only>Support forum</span>
             <svg role=img class=icon viewBox="0 0 24 24" style='width: 20px; height: 20px' fill=currentColor>
                 <g buffered-rendering=static>
                     <path d="M22.22 9.787c0-5.13-4.062-8.307-8.983-8.307-6.666 0-11.457 4.948-11.457 11.431 0 6.042 4.609 9.609 9.999 9.609 1.64 0 3.749-.391 5.234-1.12l.364-2.031c-1.484.729-3.645 1.224-5.442 1.224-4.661 0-7.968-2.968-7.968-7.682 0-5.025 3.619-9.478 9.14-9.478 3.854 0 7.004 2.318 7.004 6.354 0 1.562-.39 3.671-1.588 4.843-.521.521-1.068.885-1.849.885-.599 0-1.015-.312-1.015-1.015 0-.235.052-.495.104-.729l1.614-6.458h-1.745l-.65 1.094c-.521-.938-1.615-1.381-2.63-1.381-3.386 0-5.208 3.151-5.208 6.25 0 1.198.416 2.291 1.197 3.047.599.598 1.485 1.041 2.5 1.041 1.328 0 2.422-.443 3.307-1.458.209.729 1.042 1.458 2.292 1.458 1.64 0 2.578-.625 3.541-1.562 1.536-1.484 2.239-3.828 2.239-6.015zm-7.916 1.276c0 1.77-.755 4.426-2.916 4.426-1.458 0-2.057-1.067-2.057-2.395 0-1.094.365-2.474 1.172-3.385.442-.495 1.015-.886 1.718-.886 1.406 0 2.083.886 2.083 2.24z"/>
+                </g>
+            </svg>
+        </a>
+        {% endif %}
+        {% if site.ko_fi %}
+        <a href="https://ko-fi.com/{{site.ko_fi}}" class="hover:text-sky-700 transition-colors">
+            <span class=sr-only>By Coffee</span>
+            <svg role=img class=icon viewBox="0 0 24 24" style='width: 20px; height: 20px' fill=currentColor>
+                <g buffered-rendering=static>
+                    <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/>
                 </g>
             </svg>
         </a>

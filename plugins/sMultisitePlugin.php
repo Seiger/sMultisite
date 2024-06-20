@@ -24,6 +24,10 @@ Event::listen('evolution.OnLoadSettings', function() {
             evo()->setConfig('site_root', (int)$domain->resource);
         }
     }
+    $aliasListing = Cache::get('sMultisite-' . evo()->getConfig('site_key', 'default') . '-resources') ?? [];
+    if (is_array($aliasListing)) {
+        evo()->documentListing = $aliasListing;
+    }
 });
 
 /**

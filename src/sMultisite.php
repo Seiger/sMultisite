@@ -64,26 +64,30 @@ class sMultisite
      */
     public function domainsTree()
     {
-        $domains = \Seiger\sMultisite\Models\sMultisite::all();
+        $domainIds = [];
         $domainBaseIds = evo()->getChildIds(0, 1);
+        $domains = \Seiger\sMultisite\Models\sMultisite::all();
         $multisiteResources = $domains->pluck('resource')->toArray();
+
         if (count($multisiteResources)) {
             $domainBaseIds = array_diff($domainBaseIds, $multisiteResources);
+        }
+        foreach ($domainBaseIds as $domainBaseId) {
+            $domainIds = array_merge($domainIds, evo()->getChildIds($domainBaseId));
+        }
+        Cache::forget('sMultisite-default-resources');
+        Cache::rememberForever('sMultisite-default-resources', function () use ($domainIds) {
+            return $domainIds;
+        });
 
+        if ($domains) {
             foreach ($domains as $domain) {
                 $domainIds = evo()->getChildIds($domain->resource);
+                Cache::forget('sMultisite-' . $domain->key . '-resources');
                 Cache::rememberForever('sMultisite-' . $domain->key . '-resources', function () use ($domainIds) {
                     return $domainIds;
                 });
             }
         }
-
-        $domainDefaultIds = $domainBaseIds;
-        foreach ($domainBaseIds as $domainBaseId) {
-            $domainDefaultIds = array_merge($domainDefaultIds, evo()->getChildIds($domainBaseId));
-        }
-        Cache::rememberForever('sMultisite-default-resources', function () use ($domainDefaultIds) {
-            return $domainDefaultIds;
-        });
     }
 }
