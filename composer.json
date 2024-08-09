@@ -1,7 +1,7 @@
 {
     "name": "seiger/smultisite",
     "license": "GPL-3.0",
-    "type": "EvolutionCMS-Plugin",
+    "type": "evolutioncms-plugin",
     "description": "Evocms package Multisite Tools for Evolution CMS.",
     "keywords": ["evocms", "evolution-cms", "multisite"],
     "authors": [
@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": "^8"
+        "php": "^8.1"
     },
     "autoload": {
         "psr-4": {
