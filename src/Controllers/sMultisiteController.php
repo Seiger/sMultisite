@@ -98,7 +98,8 @@ class sMultisiteController
     {
         if (trim($string)) {
             $alias = explode('.', $string);
-            array_pop($string);
+           // array_pop($string);
+            array_pop($alias); // Here we are passing the $alias array, not the $string
             $alias = Str::slug(trim(implode('', $alias)));
         } else {
             $alias = $id;
