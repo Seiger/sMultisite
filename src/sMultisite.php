@@ -97,7 +97,7 @@ class sMultisite
         }
 
         // Replace the scheme in the URL if necessary
-        return preg_replace('/^http/', $scheme, $url);
+        return preg_replace('/^http:\/\//', $scheme . '://', $url);
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php namespace Seiger\sMultisite;
 
 use EvolutionCMS\ServiceProvider;
-use Seiger\sMultisite\Facades\sMultisite as SMultisiteFacade;
+use Seiger\sMultisite\Facades\sMultisite as sMultisiteFacade;
 
 /**
  * Class sMultisiteServiceProvider
@@ -10,25 +10,6 @@ use Seiger\sMultisite\Facades\sMultisite as SMultisiteFacade;
  */
 class sMultisiteServiceProvider extends ServiceProvider
 {
-    /**
-     * Register bindings and services in the container.
-     *
-     * This method is used to bind classes or interfaces into the service container.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        // Register the sMultisite class as a singleton
-        $this->app->singleton('sMultisite', fn($app) => new sMultisite());
-
-        // Create an alias for the sMultisite facade
-        class_alias(SMultisiteFacade::class, 'sMultisite');
-
-        // Add plugins to Evolution CMS
-        $this->loadPluginsFrom(dirname(__DIR__) . '/plugins/');
-    }
-
     /**
      * Perform post-registration booting of services.
      *
@@ -43,23 +24,48 @@ class sMultisiteServiceProvider extends ServiceProvider
             // Load the package routes
             $this->loadRoutesFrom(__DIR__.'/Http/routes.php');
 
-            // Load the package views
+            // Load migrations, views, translations only if necessary
+            $this->loadMigrationsFrom(dirname(__DIR__) . '/database/migrations');
             $this->loadViewsFrom(dirname(__DIR__) . '/views', 'sMultisite');
-
-            // Load the package translations
             $this->loadTranslationsFrom(dirname(__DIR__) . '/lang', 'sMultisite');
 
-            // Publish configuration files
-            $this->publishes([
-                dirname(__DIR__) . '/config/sMultisiteSettings.php' => config_path('seiger/settings/sMultisite.php', true),
-                dirname(__DIR__) . '/images/seigerit-blue.svg' => public_path('assets/site/seigerit-blue.svg'),
-            ]);
-
-            // Load migration files
-            $this->loadMigrationsFrom(dirname(__DIR__) . '/database/migrations');
+            // Publish configuration and assets
+            $this->publishResources();
         }
 
-        // Merge sMultisite configuration
+        // Merge configuration for sMultisite
         $this->mergeConfigFrom(dirname(__DIR__) . '/config/sMultisiteCheck.php', 'cms.settings');
+
+        // Register sGallery as a singleton using the key 'sGallery'
+        $this->app->singleton('sMultisite', fn($app) => new sMultisite());
+
+        // Create class alias for the facade
+        class_alias(sMultisiteFacade::class, 'sMultisite');
+    }
+
+    /**
+     * Register bindings and services in the container.
+     *
+     * This method is used to bind classes or interfaces into the service container.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        // Add plugins to Evolution CMS
+        $this->loadPluginsFrom(dirname(__DIR__) . '/plugins/');
+    }
+
+    /**
+     * Publish the necessary resources for the package.
+     *
+     * @return void
+     */
+    protected function publishResources()
+    {
+        $this->publishes([
+            dirname(__DIR__) . '/config/sMultisiteSettings.php' => config_path('seiger/settings/sMultisite.php', true),
+            dirname(__DIR__) . '/images/seigerit-blue.svg' => public_path('assets/site/seigerit-blue.svg'),
+        ]);
     }
 }
