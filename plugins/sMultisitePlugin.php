@@ -10,19 +10,21 @@ use Seiger\sMultisite\Facades\sMultisite;
 /**
  * Load start parameters
  */
-Event::listen('evolution.OnLoadSettings', function() {
+Event::listen('evolution.OnLoadSettings', function($params) {
+    $host = $_SERVER['HTTP_HOST'];
+    if (isset($params['config']['setHost']) && trim($params['config']['setHost']) !== '') {
+        $host = trim($params['config']['setHost']);
+    }
     evo()->setConfig('site_key', 'default');
     evo()->setConfig('site_root', 0);
-    if (evo()->isFrontend()) {
-        $domain = \Seiger\sMultisite\Models\sMultisite::whereDomain($_SERVER['HTTP_HOST'])->whereActive(1)->first();
-        if ($domain) {
-            evo()->setConfig('site_key', $domain->key);
-            evo()->setConfig('site_name', $domain->site_name);
-            evo()->setConfig('site_start', $domain->site_start);
-            evo()->setConfig('error_page', $domain->error_page);
-            evo()->setConfig('unauthorized_page', $domain->unauthorized_page);
-            evo()->setConfig('site_root', (int)$domain->resource);
-        }
+    $domain = \Seiger\sMultisite\Models\sMultisite::whereDomain($host)->whereActive(1)->first();
+    if ($domain) {
+        evo()->setConfig('site_key', $domain->key);
+        evo()->setConfig('site_name', $domain->site_name);
+        evo()->setConfig('site_start', $domain->site_start);
+        evo()->setConfig('error_page', $domain->error_page);
+        evo()->setConfig('unauthorized_page', $domain->unauthorized_page);
+        evo()->setConfig('site_root', (int)$domain->resource);
     }
     $aliasListing = Cache::get('sMultisite-' . evo()->getConfig('site_key', 'default') . '-resources') ?? [];
     if (is_array($aliasListing)) {
