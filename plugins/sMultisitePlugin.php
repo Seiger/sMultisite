@@ -80,6 +80,14 @@ Event::listen('evolution.OnCacheUpdate', function($params) {
 });
 
 /**
+ * Load System settings from correct Domain
+ */
+Event::listen('evolution.OnDocFormPrerender', function($params) {
+    $config = array_merge(evo()->config, ['setHost' => parse_url(url($params['id']), PHP_URL_HOST)]);
+    evo()->invokeEvent('OnLoadSettings', ['config' => &$config]);
+});
+
+/**
  * Add Menu item
  */
 Event::listen('evolution.OnManagerMenuPrerender', function($params) {
