@@ -1,9 +1,17 @@
 ---
-layout: page
 title: Getting started
-description: Getting started with sMultisite
-permalink: /getting-started/
+sidebar_label: Getting started
+sidebar_position: 2
 ---
+
+## Requirements
+- Evolution CMS **3.2.0+**
+- PHP **8.2+**
+- Composer **2.2+**
+- One of: **MySQL 8.0+** / **MariaDB 10.5+** / **PostgreSQL 10+** / **SQLite 3.25+**
+
+## Where to find the module
+Manager → **Tools → sMultisite**. You’ll see tabs for Configure.
 
 ## Install by artisan package
 
@@ -11,6 +19,10 @@ Go to You /core/ folder
 
 ```console
 cd core
+```
+
+```console
+composer update
 ```
 
 Run php artisan commands
@@ -37,20 +49,15 @@ $currentDomainNotFoundPage = evo()->getConfig('error_page');
 $currentDomainUnauthorizedPage = evo()->getConfig('unauthorized_page');
 ```
 
-## Configuration in backend
-
-Plugin settings are located at **Admin Panel -> Tools -> sMultisite**.
-{% include figure.html path="assets/img/smultisitetools.jpg" %}
-
 ## Configuration in frontend
 
 Show all domains in Blade layout:
 
 ```php
 @foreach(sMultisite::domains() as $domain)
-    <a href="{% raw %}{{$domain['link']}}{% endraw %}" class="@if($domain['is_current']) active @endif">
-        <img src="/img/logo-{% raw %}{{$domain['key']}}{% endraw %}.svg" alt="" />
-        <span>{% raw %}{{$domain['site_name']}}{% endraw %}</span>
+    <a href="{{$domain['link']}}" class="@if($domain['is_current']) active @endif">
+        <img src="/img/logo-{{$domain['key']}}.svg" alt="" />
+        <span>{{$domain['site_name']}}</span>
     </a>
 @endforeach
 ```
@@ -65,7 +72,7 @@ array:2 [▼
         "site_name" => "Default Example Website"
         "is_current" => true
     ]
-    "nordic" => array:4 [▼
+    "example" => array:4 [▼
         "key" => "example"
         "link" => "https://example.example.com"
         "site_name" => "Example Example Website"
@@ -74,9 +81,7 @@ array:2 [▼
 ]
 ```
 
-More examples in **Use in Blade** page
-
-[Use in Blade]({{ site.baseurl }}/use-in-blade/){: .btn .btn-sky}
+More examples in **[Use in Blade](./use-in-blade.md)** page.
 
 ## Extra
 

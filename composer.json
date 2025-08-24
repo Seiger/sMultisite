@@ -1,34 +1,54 @@
 {
-    "name": "seiger/smultisite",
-    "license": "GPL-3.0",
-    "type": "evolutioncms-plugin",
-    "description": "Evocms package Multisite Tools for Evolution CMS.",
-    "keywords": ["evocms", "evolution-cms", "multisite"],
-    "authors": [
-        {
-            "name": "Serhii Korneliuk",
-            "email": "info@seigerit.com"
-        }
-    ],
-    "require": {
-        "php": "^8.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "Seiger\\sMultisite\\": "src/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Seiger\\sMultisite\\sMultisiteServiceProvider"
-            ],
-            "aliases": {
-                "sMultisite": "Seiger\\sMultisite\\Facades\\sMultisite"
-            }
-        }
-    },
-    "scripts": {
-        "post-autoload-dump": []
+  "name": "seiger/smultisite",
+  "license": "GPL-3.0",
+  "type": "evolutioncms-plugin",
+  "description": "Evocms package for collection of Multisite Tools for Evolution CMS.",
+  "keywords": [
+    "evocms",
+    "evolution-cms",
+    "multisite",
+    "multidomain",
+    "evolution-cms-domain",
+    "multisite-tools",
+    "cms-multisite",
+    "evolution-cms-plugin"
+  ],
+  "authors": [
+    {
+      "name": "Serhii Korneliuk",
+      "email": "info@seigerit.com"
     }
+  ],
+  "require": {
+    "php": "^8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Seiger\\sMultisite\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Seiger\\sMultisite\\sMultisiteServiceProvider"
+      ],
+      "aliases": {
+        "sMultisite": "Seiger\\sMultisite\\Facades\\sMultisite"
+      }
+    }
+  },
+  "config": {
+    "exclude-files": [
+      "/docs",
+      "/docs/**",
+      "/.git/*",
+      "/.github/*",
+      "/.idea/*",
+      "README.md",
+      "LICENSE"
+    ]
+  },
+  "scripts": {
+    "post-autoload-dump": []
+  }
 }

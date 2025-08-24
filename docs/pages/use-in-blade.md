@@ -1,8 +1,7 @@
 ---
-layout: page
 title: Use in Blade
-description: Use sMultisite code in Blade layouts
-permalink: /use-in-blade/
+sidebar_label: Use in Blade
+sidebar_position: 3
 ---
 
 You can use different templates for each domain.
@@ -31,7 +30,7 @@ array:2 [▼
         "site_name" => "Default Example Website"
         "is_current" => true
     ]
-    "nordic" => array:4 [▼
+    "example" => array:4 [▼
         "key" => "example"
         "link" => "https://example.example.com"
         "site_name" => "Example Example Website"
