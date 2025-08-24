@@ -13,9 +13,9 @@ Use this example code for show all active domains:
 
 ```php
 @foreach(sMultisite::domains() as $domain)
-    <a href="{% raw %}{{$domain['link']}}{% endraw %}" class="@if($domain['is_current']) active @endif">
-        <img src="/img/logo-{% raw %}{{$domain['key']}}{% endraw %}.svg" alt="" />
-        <span>{% raw %}{{$domain['site_name']}}{% endraw %}</span>
+    <a href="{{$domain['link']}}" class="@if($domain['is_current']) active @endif">
+        <img src="/img/logo-{{$domain['key']}}.svg" alt="" />
+        <span>{{$domain['site_name']}}</span>
     </a>
 @endforeach
 ```
@@ -57,9 +57,9 @@ In this array:
 @if(evo()->documentIdentifier == evo()->getConfig('site_start'))
     <span class="header__logo">
 @else
-    <a href="{% raw %}{{url(evo()->getConfig('site_start'), '', '', 'full')}}{% endraw %}" class="header__logo">
+    <a href="{{url(evo()->getConfig('site_start'), '', '', 'full')}}" class="header__logo">
 @endif
-    <img src="/img/main-logo-{% raw %}{{evo()->getConfig('site_key')}}{% endraw %}.svg" alt="{% raw %}{{evo()->getConfig('site_name')}}{% endraw %} logo" />
+    <img src="/img/main-logo-{{evo()->getConfig('site_key')}}.svg" alt="{{evo()->getConfig('site_name')}} logo" />
 @if(evo()->documentIdentifier == evo()->getConfig('site_start'))
     </span>
 @else
