@@ -64,6 +64,10 @@ class sMultisiteServiceProvider extends ServiceProvider
      */
     protected function publishResources()
     {
+        if ($this->app->runningInConsole()) {
+            $this->commands([PublishAssets::class]);
+        }
+
         $this->publishes([
             dirname(__DIR__) . '/config/sMultisiteSettings.php' => config_path('seiger/settings/sMultisite.php', true),
             dirname(__DIR__) . '/images/seigerit.svg' => public_path('assets/site/seigerit.svg'),
@@ -72,9 +76,5 @@ class sMultisiteServiceProvider extends ServiceProvider
             dirname(__DIR__) . '/js/main.js' => public_path('assets/site/smultisite.js'),
             dirname(__DIR__) . '/js/tooltip.js' => public_path('assets/site/seigerit.tooltip.js'),
         ]);
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([PublishAssets::class]);
-        }
     }
 }

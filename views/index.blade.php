@@ -9,7 +9,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <link rel="icon" type="image/svg+xml" href="{{asset('site/smultisite.svg')}}" />
     <style>[x-cloak]{display:none!important}</style>
-    <link rel="stylesheet" href="{{asset('site/smultisite.min.css')}}">
+    <link rel="stylesheet" href="{{asset('site/smultisite.min.css')}}?{{evo()->getConfig('sMultisiteVer')}}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@latest/build/css/alertify.min.css"/>
     @if(class_exists(Tracy\Debugger::class) && config('tracy.active')){!!Tracy\Debugger::renderLoader()!!}@endif
     {!!ManagerTheme::getMainFrameHeaderHTMLBlock()!!}
@@ -37,7 +37,7 @@
         ))!!};
     </script>
     <script src="media/script/main.js"></script>
-    <script src="{{asset('site/smultisite.js.main.js')}}"></script>
+    <script src="{{asset('site/smultisite.js')}}?{{evo()->getConfig('sMultisiteVer')}}"></script>
     @stack('scripts.top')
     {!!EvolutionCMS()->getRegisteredClientStartupScripts()!!}
 </head>

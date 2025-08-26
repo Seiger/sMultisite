@@ -1,1 +1,1 @@
-<?php return ['check_sMultisite' => true];
+<?php return ['check_sMultisite' => true, 'sMultisiteVer' => 'dev-master'];

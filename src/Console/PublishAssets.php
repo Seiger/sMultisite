@@ -31,20 +31,21 @@ class PublishAssets extends Command
                 // File::delete() is safe even if file does not exist
                 $fs->delete($path);
             }
-            $this->info('Pruned old assets (if existed).');
         }
 
         // 2) Publish (force overwrite)
         $this->call('vendor:publish', [
             '--provider' => 'Seiger\sMultisite\sMultisiteServiceProvider',
-            '--force'    => true,
         ]);
 
         // 3) (Optional) drop VERSION file for debugging
         try {
             $ver = \Composer\InstalledVersions::getVersion('seiger/smultisite');
             $fs->ensureDirectoryExists(public_path('assets/site'));
-            $fs->put(public_path('assets/site/VERSION'), (string)$ver);
+            $fs->put(
+                public_path('core/vendor/seiger/smultisite/config/sMultisiteCheck.php'),
+                "<?php return ['check_sMultisite' => true, 'sMultisiteVer' => '" . $ver . "'];"
+            );
         } catch (\Throwable) {
             // ignore if class not available
         }
