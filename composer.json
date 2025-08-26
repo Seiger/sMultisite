@@ -49,6 +49,12 @@
     ]
   },
   "scripts": {
-    "post-autoload-dump": []
+    "post-autoload-dump": [],
+    "post-install-cmd": [
+      "@php core/artisan smultisite:publish"
+    ],
+    "post-update-cmd": [
+      "@php core/artisan smultisite:publish"
+    ]
   }
 }

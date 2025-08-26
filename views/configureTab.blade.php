@@ -1,129 +1,89 @@
-<form id="form" name="form" method="post" action="{{sMultisite::route('sMultisite.update')}}" onsubmit="documentDirty=false;">
-    @foreach(Seiger\sMultisite\Models\sMultisite::all() as $domain)
-        <div id="domain-{{$domain->id}}">
-            <input type="hidden" name="domains[{{$domain->id}}][key]" value="{{$domain->key}}">
-            <div class="row form-row form-element-input">
-                <label class="control-label col-5 col-md-4 col-lg-2">
-                    <span>@lang('sMultisite::global.domain')</span>
-                    <i class="fa fa-question-circle" data-tooltip="@lang('sMultisite::global.domain_help')"></i>
-                    @if($domain->key == 'default')
-                        <sup><span class="badge bg-seigerit">Default</span></sup>
-                    @endif
-                </label>
-                <div class="col-7 col-md-8 col-lg-10">
-                    <input name="domains[{{$domain->id}}][domain]" value="{{$domain->domain}}" data-validate="textNoEmpty" data-text="<b>@lang('sMultisite::global.domain')</b> @lang('sMultisite::global.empty_field')" placeholder="example.com" type="text" class="form-control" onchange="documentDirty=true;">
+@extends('sMultisite::index')
+@section('header')
+    <button class="s-btn s-btn--primary" onclick="openAddDomainModal();">
+        <i data-lucide="plus" class="w-4 h-4"></i>@lang('global.add')
+    </button>
+    <button class="s-btn s-btn--success" onclick="window.sMultisite.submitForm('#form');">
+        <i data-lucide="save" class="w-4 h-4"></i>@lang('global.save')
+    </button>
+@endsection
+@section('content')
+    <form id="form" name="form" method="post" enctype="multipart/form-data" action="{{sMultisite::route('sMultisite.uconfigure')}}" onsubmit="documentDirty=false;">@csrf
+        @if(!is_writable(EVO_CORE_PATH . 'custom/config/seiger/settings/sMultisite.php'))
+            <div class="s-alert s-alert--danger">
+                <i data-lucide="alert-triangle" class="s-alert--icon-danger"></i>
+                <div>
+                    <strong class="font-semibold">@lang('sMultisite::global.warning')</strong><br>
+                    @lang('sMultisite::global.not_writable', ['file' => EVO_CORE_PATH . 'custom/config/seiger/settings/sMultisite.php'])
                 </div>
             </div>
-
-            <div class="row form-row form-element-input">
-                <label class="control-label col-5 col-md-4 col-lg-2">
-                    <span>@lang('global.sitename_title')</span>
-                    <i class="fa fa-question-circle" data-tooltip="@lang('global.sitename_message')"></i>
-                </label>
-                <div class="col-7 col-md-8 col-lg-10">
-                    <input name="domains[{{$domain->id}}][site_name]" value="{{$domain->site_name}}" data-validate="textNoEmpty" data-text="<b>@lang('global.sitename_title')</b> @lang('sMultisite::global.empty_field')" placeholder="Evolution CMS website" type="text" class="form-control" onchange="documentDirty=true;">
-                </div>
-            </div>
-
-            <div class="row form-row form-element-input">
-                <label class="control-label col-5 col-md-4 col-lg-2">
-                    <span>@lang('global.sitestart_title')</span>
-                    <i class="fa fa-question-circle" data-tooltip="@lang('global.sitestart_message')"></i>
-                </label>
-                <div class="col-7 col-md-8 col-lg-10">
-                    <input name="domains[{{$domain->id}}][site_start]" value="{{$domain->site_start}}" type="text" class="form-control" onchange="documentDirty=true;">
-                </div>
-            </div>
-
-            <div class="row form-row form-element-input">
-                <label class="control-label col-5 col-md-4 col-lg-2">
-                    <span>@lang('global.errorpage_title')</span>
-                    <i class="fa fa-question-circle" data-tooltip="@lang('global.errorpage_message')"></i>
-                </label>
-                <div class="col-7 col-md-8 col-lg-10">
-                    <input name="domains[{{$domain->id}}][error_page]" value="{{$domain->error_page}}" type="text" class="form-control" onchange="documentDirty=true;">
-                </div>
-            </div>
-
-            <div class="row form-row form-element-input">
-                <label class="control-label col-5 col-md-4 col-lg-2">
-                    <span>@lang('global.unauthorizedpage_title')</span>
-                    <i class="fa fa-question-circle" data-tooltip="@lang('global.unauthorizedpage_message')"></i>
-                </label>
-                <div class="col-7 col-md-8 col-lg-10">
-                    <input name="domains[{{$domain->id}}][unauthorized_page]" value="{{$domain->unauthorized_page}}" type="text" class="form-control" onchange="documentDirty=true;">
-                </div>
-            </div>
-
-            @if($domain->key != 'default')
-                <div class="row form-row form-element-input">
-                    <label class="control-label col-5 col-md-4 col-lg-2">
-                        <span>@lang('sMultisite::global.domain_on')</span>
-                        <i class="fa fa-question-circle" data-tooltip="@lang('sMultisite::global.domain_on_help')"></i>
-                    </label>
-                    <div class="col-7 col-md-8 col-lg-10">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" id="active_on_{{$domain->id}}" class="custom-control-input" name="domains[{{$domain->id}}][active]" value="{{$domain->active}}" onclick="changestate(document.form.active_on_{{$domain->id}});" onchange="documentDirty=true;" @if($domain->active) checked @endif>
-                            <label class="custom-control-label" for="active_on_{{$domain->id}}"></label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row form-row form-element-input">
-                    <label class="control-label col-5 col-md-4 col-lg-2">
-                        <span>@lang('sMultisite::global.hide_from_tree')</span>
-                        <i class="fa fa-question-circle" data-tooltip="@lang('sMultisite::global.hide_from_tree_help')"></i>
-                    </label>
-                    <div class="col-7 col-md-8 col-lg-10">
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" id="hide_from_tree_{{$domain->id}}" class="custom-control-input" name="domains[{{$domain->id}}][hide_from_tree]" value="{{$domain->hide_from_tree}}" data-validate="hideFromTreeCheck" data-text="<b>@lang('sMultisite::global.hide_from_tree')</b> @lang('sMultisite::global.must_be_dis-active')" onclick="changestate(document.form.hide_from_tree_{{$domain->id}});" onchange="documentDirty=true;" @if($domain->hide_from_tree) checked @endif>
-                            <label class="custom-control-label" for="hide_from_tree_{{$domain->id}}"></label>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <div class="split my-3"></div>
-        </div>
-    @endforeach
-</form>
-
+        @endif
+        @foreach($domains as $domain)
+            @include('sMultisite::partials.domainForm', ['item' => $domain])
+        @endforeach
+    </form>
+@endsection
 @push('scripts.bot')
-    <div id="actions">
-        <div class="btn-group">
-            <a id="Button1" class="btn btn-success" href="javascript:void(0);" onclick="saveForm('#form');">
-                <i class="fa fa-save"></i> <span>@lang('global.save')</span>
-            </a>
-            <a id="Button2" class="btn btn-primary" href="javascript:void(0);" onclick="addDomain();" title="@lang('sMultisite::global.add_help')">
-                <i class="fa fa-plus"></i> <span>@lang('global.add')</span>
-            </a>
-        </div>
-    </div>
-
-    <div class="hidden-elements" style="display: none;">
-        <div class="row form-row form-element-input">
-            <label class="control-label col-5 col-md-3 col-lg-2">
-                <span>@lang('sMultisite::global.domain')</span>
-                <i class="fa fa-question-circle" data-tooltip="@lang('sMultisite::global.domain_help')"></i>
-            </label>
-            <div class="col-7 col-md-9 col-lg-10">
-                <input name="new-domains[]" value="" type="text" class="form-control" onchange="documentDirty=true;">
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Add a new domain input field
-        function addDomain() {
-            const element = document.querySelector('.hidden-elements').innerHTML;
-            document.getElementById('form').insertAdjacentHTML('beforeend', element);
-            documentDirty = true;
-        }
+        function openAddDomainModal() {
+            let formHtml = `
+                <div class="m-2">
+                    <label class="block text-sm font-medium mb-1">` + '@lang('sMultisite::global.domain_key')' + `
+                        <span class="inline-flex items-center justify-center align-middle translate-y-[-2px] text-slate-400">
+                            <i data-lucide="help-circle" data-tooltip="` + '@lang('sMultisite::global.domain_key_help')' + `" class="w-4 h-4 inline"></i>
+                        </span>
+                    </label>
+                    <input name="domain_key" type="text" class="w-full border rounded px-3 py-2 text-sm darkness:bg-slate-800" placeholder="example"/>
+                </div>
+                <div class="m-2">
+                    <label class="block text-sm font-medium mb-1">` + '@lang('sMultisite::global.domain')' + `
+                        <span class="inline-flex items-center justify-center align-middle translate-y-[-2px] text-slate-400">
+                            <i data-lucide="help-circle" data-tooltip="` + '@lang('sMultisite::global.domain_help')' + `" class="w-4 h-4 inline"></i>
+                        </span>
+                    </label>
+                    <input name="domain" type="text" class="w-full border rounded px-3 py-2 text-sm darkness:bg-slate-800" placeholder="example.com"/>
+                </div>
+            `;
 
-        // Toggle the value of a checkbox input
-        function changestate(el) {
-            el.value = el.value === '1' ? '0' : '1';
-            documentDirty = true;
+            alertify.confirm()
+                .set({
+                    title: `<h3>@lang('sMultisite::global.add_help')</h3>`,
+                    message: `<form id="redirectForm">${formHtml}</form>`,
+                    onok: function () {
+                        window.parent.document.getElementById('mainloader')?.classList.add('show');
+                        let redirectForm = document.getElementById('redirectForm');
+                        let formData = new FormData(redirectForm);
+
+                        if (!formData.get('domain_key') || !formData.get('domain')) {
+                            alertify.error("@lang('sMultisite::global.error_empty_fields')");
+                            window.parent.document.getElementById('mainloader')?.classList.remove('show');
+                            return false;
+                        }
+
+                        (async () => {
+                            let response = await window.sMultisite.callApi('{!!sMultisite::route('sMultisite.adomain')!!}', formData);
+
+                            if (response.success === true) {
+                                parent.location.reload();
+                            } else {
+                                alertify.error(response.message);
+                            }
+
+                            window.parent.document.getElementById('mainloader')?.classList.remove('show');
+                        })();
+                        return false;
+                    },
+                    oncancel: function () {
+                        alertify.notify("@lang('sSeo::global.action_cancelled')");
+                    }
+                })
+                .set('labels', {ok: "@lang('global.save')", cancel: "@lang('global.cancel')"})
+                .set('closable', false)
+                .set('transition', 'zoom')
+                .set('defaultFocus', 'cancel')
+                .set('notifier', 'delay', 5)
+                .show();
+            window.sSeo.queueLucide();
         }
     </script>
 @endpush

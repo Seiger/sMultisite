@@ -95,8 +95,8 @@ Event::listen('evolution.OnManagerMenuPrerender', function($params) {
         $menu['smultisite'] = [
             'smultisite',
             'tools',
-            '<i class="' . __('sMultisite::global.icon') . '"></i><span class="menu-item-text">' . __('sMultisite::global.title') . '</span>',
-            sMultisite::route('sMultisite.index'),
+            '<i class="' . __('sMultisite::global.icon') . '"></i>' . __('sMultisite::global.title'),
+            sMultisite::route('sMultisite.configure'),
             __('sMultisite::global.title'),
             "",
             "",

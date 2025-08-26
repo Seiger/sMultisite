@@ -8,13 +8,19 @@ use View;
 class sMultisiteController
 {
     /**
-     * Show tabs with custom system settings
+     * Returns the view for the configure page.
      *
-     * @return View
+     * @return mixed The view for the configure page.
      */
-    public function index()
+    public function configure()
     {
-        return $this->view('index');
+        $data = [
+            'tabIcon' => '<i data-lucide="settings" class="w-6 h-6 text-blue-400 drop-shadow-[0_0_6px_#3b82f6]"></i>',
+            'tabName' => __('sMultisite::global.configure'),
+        ];
+        $data['domains'] = sMultisite::all();
+        
+        return $this->view('configureTab', $data);
     }
 
     /**
@@ -22,32 +28,56 @@ class sMultisiteController
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update()
+    public function updateConfigure()
     {
         $newDomains = request()->input('new-domains', []);
         $existingDomains = request()->input('domains', []);
         $this->processNewDomains($newDomains);
         $this->updateExistingDomains($existingDomains);
-        $_SESSION['sMultisite.refresh'] = true;
-        return header("Location: " . \Seiger\sMultisite\Facades\sMultisite::route('sMultisite.index'));
+        return redirect()->back()->with('refresh', __('sMultisite::global.success_updated'));
     }
 
     /**
-     * Process new domains and save them
-     *
-     * @param array $domains
-     * @return bool
+     * Add new domains and save them
      */
-    private function processNewDomains(array $domains): bool
+    public function addNewDomains()
     {
-        $refresh = false;
-        foreach ($domains as $item) {
-            $item = $this->sanitizeDomain($item);
-            if (!$this->domainExists($item)) {
-                $this->createDomainResources($item);
-            }
+        $domain = request()->only(['domain_key', 'domain']);
+
+        if (empty($domain)) {
+            return [
+                'success' => false,
+                'message' => __('sMultisite::global.error_empty_fields'),
+            ];
         }
-        return $refresh;
+
+        $domain_key = preg_replace('/[^a-z]/', '', Str::slug($domain['domain_key']));
+        $key = $this->validateKey($domain_key);
+
+        if (empty($key) || $domain_key !== $key) {
+            return [
+                'success' => false,
+                'message' => __('sMultisite::global.no_valid_domain_key'),
+            ];
+        }
+
+        $alias = $this->sanitizeDomain($domain['domain']);
+        $labels = explode('.', $alias);
+
+        if (count($labels) < 2 || $this->domainExists($alias)) {
+            return [
+                'success' => false,
+                'message' => __('sMultisite::global.no_valid_domain'),
+            ];
+        }
+
+        $this->createDomainResources($alias, $key);
+        $_SESSION['sMultisite.refresh'] = __('sMultisite::global.success_updated');
+
+        return [
+            'success' => true,
+            'message' => __('sMultisite::global.success_updated'),
+        ];
     }
 
     /**
@@ -61,7 +91,7 @@ class sMultisiteController
         $refresh = false;
         foreach ($domains as $id => $item) {
             if (is_array($item) && $domain = sMultisite::find($id)) {
-                if ($item['key'] != 'default') {
+                if ($domain->key != 'default') {
                     $item['active'] = intval($item['active'] ?? 0);
                     $item['hide_from_tree'] = intval($item['hide_from_tree'] ?? 0);
                 }
@@ -79,7 +109,7 @@ class sMultisiteController
      *
      * @param string $item
      */
-    private function createDomainResources(string $item): void
+    private function createDomainResources(string $item, string $key): void
     {
         $resource = new SiteContent();
         $resource->fill([
@@ -106,7 +136,7 @@ class sMultisiteController
         $domain = new sMultisite();
         $domain->fill([
             'domain' => $item,
-            'key' => $this->validateKey($item),
+            'key' => $key,
             'resource' => $resource->id,
             'site_name' => 'Evolution CMS website',
             'site_start' => $homepage->id,
@@ -171,7 +201,9 @@ class sMultisiteController
     {
         if (trim($string)) {
             $alias = explode('.', $string);
-            array_pop($alias);
+            if (count($alias) > 1) {
+                array_pop($alias);
+            }
             return Str::slug(trim(implode('', $alias)));
         }
         return '';

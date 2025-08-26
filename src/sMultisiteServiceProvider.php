@@ -1,6 +1,7 @@
 <?php namespace Seiger\sMultisite;
 
 use EvolutionCMS\ServiceProvider;
+use Seiger\sMultisite\Console\PublishAssets;
 use Seiger\sMultisite\Facades\sMultisite as sMultisiteFacade;
 
 /**
@@ -65,7 +66,15 @@ class sMultisiteServiceProvider extends ServiceProvider
     {
         $this->publishes([
             dirname(__DIR__) . '/config/sMultisiteSettings.php' => config_path('seiger/settings/sMultisite.php', true),
-            dirname(__DIR__) . '/images/seigerit-blue.svg' => public_path('assets/site/seigerit-blue.svg'),
+            dirname(__DIR__) . '/images/seigerit.svg' => public_path('assets/site/seigerit.svg'),
+            dirname(__DIR__) . '/images/logo.svg' => public_path('assets/site/smultisite.svg'),
+            dirname(__DIR__) . '/css/tailwind.min.css' => public_path('assets/site/smultisite.min.css'),
+            dirname(__DIR__) . '/js/main.js' => public_path('assets/site/smultisite.js'),
+            dirname(__DIR__) . '/js/tooltip.js' => public_path('assets/site/seigerit.tooltip.js'),
         ]);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([PublishAssets::class]);
+        }
     }
 }

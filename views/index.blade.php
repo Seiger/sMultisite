@@ -1,89 +1,93 @@
-@extends('manager::template.page')
-
-@section('content')
-    <h1>
-        <i class="@lang('sMultisite::global.icon')" data-tooltip="@lang('sMultisite::global.description')"></i>
-        @lang('sMultisite::global.title')
-    </h1>
-    <div class="sectionBody">
-        <div class="tab-pane" id="resourcesPane">
-            <script>tpResources = new WebFXTabPane(document.getElementById('resourcesPane'), false);</script>
-            <div class="tab-page configureTab" id="configureTab">
-                <h2 class="tab">
-                    <a href="{{sMultisite::route('sMultisite.index')}}">
-                        <span>
-                            <i class="@lang('sMultisite::global.configure_icon')" data-tooltip="@lang('sMultisite::global.configure_help')"></i>
-                            @lang('sMultisite::global.configure')
-                        </span>
-                    </a>
-                </h2>
-                <script>tpResources.addTabPage(document.getElementById('configureTab'));</script>
-                <div class="container container-body">
-                    @include('sMultisite::configureTab')
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
-
-@push('scripts.top')
-    @include('sMultisite::partials.style')
-@endpush
-
-@push('scripts.bot')
-    <div id="copyright">
-        <a href="https://seiger.github.io/sMultisite/" target="_blank">
-            <img src="{{evo()->getConfig('site_url', '/')}}assets/site/seigerit-blue.svg" alt="Seiger IT Logo"/>
-        </a>
-    </div>
-    <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css"/>
+<!DOCTYPE html>
+<html lang="{{ManagerTheme::getLang()}}" dir="{{ManagerTheme::getTextDir()}}">
+<head>
+    <title>{{$tabName}} @lang('sMultisite::global.title') - Evolution CMS</title>
+    <base href="{{EVO_MANAGER_URL}}">
+    <meta http-equiv="Content-Type" content="text/html; charset={{ManagerTheme::getCharset()}}"/>
+    <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width"/>
+    <meta name="theme-color" content="#0b1a2f"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <link rel="icon" type="image/svg+xml" href="{{asset('site/smultisite.svg')}}" />
+    <style>[x-cloak]{display:none!important}</style>
+    <link rel="stylesheet" href="{{asset('site/smultisite.min.css')}}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@latest/build/css/alertify.min.css"/>
+    @if(class_exists(Tracy\Debugger::class) && config('tracy.active')){!!Tracy\Debugger::renderLoader()!!}@endif
+    {!!ManagerTheme::getMainFrameHeaderHTMLBlock()!!}
+    <script defer src="https://unpkg.com/alpinejs@latest"></script>
+    <script defer src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alertifyjs@latest/build/alertify.min.js"></script>
     <script>
-        // Function to handle form validation and submission
-        function saveForm(selector) {
-            documentDirty = false;
-            let messages = [];
-            let validates = document.querySelectorAll(selector + " [data-validate]");
-            validates.forEach(function (element) {
-                let rule = element.getAttribute('data-validate').split(":");
-                switch (rule[0]) {
-                    case "hideFromTreeCheck":
-                        // Check if domain should be hidden from tree
-                        let idx = element.getAttribute('id').replace('hide_from_tree_', '');
-                        if (element.value == 1 && document.getElementById('active_on_' + idx).value == 1) {
-                            messages.push(element.getAttribute('data-text'));
-                            element.classList.remove('is-valid');
-                            element.classList.add('is-invalid');
-                        } else {
-                            element.classList.remove('is-invalid');
-                            element.classList.add('is-valid');
-                        }
-                        break;
-                    case "textNoEmpty":
-                        // Check if field is not empty
-                        if (element.value.length < 1) {
-                            messages.push(element.getAttribute('data-text'));
-                            element.classList.remove('is-valid');
-                            element.classList.add('is-invalid');
-                        } else {
-                            element.classList.remove('is-invalid');
-                            element.classList.add('is-valid');
-                        }
-                        break;
-                }
-            });
-            if (messages.length < 1) {
-                document.querySelector(selector).submit();
-            } else {
-                alertify.alert('@lang('sMultisite::global.check_fields')', messages.join("<br/>"), function(){
-                    alertify.error('@lang('sMultisite::global.not_saved')')
-                }).set('modal', true);
-            }
-        }
+        if (!evo){var evo = {};}
+        if (!evo.config){evo.config = {};}
+        var actions,actionStay = [],dontShowWorker = false,documentDirty = false,timerForUnload,managerPath = '';
+        evo.lang = {!!json_encode(Illuminate\Support\Arr::only(
+            ManagerTheme::getLexicon(),
+            ['saving', 'error_internet_connection', 'warning_not_saved']
+        ))!!};
+        evo.style = {!!json_encode(Illuminate\Support\Arr::only(
+            ManagerTheme::getStyle(),
+            ['icon_file', 'icon_pencil', 'icon_reply', 'icon_plus']
+        ))!!};
+        evo.MODX_MANAGER_URL = '{{EVO_MANAGER_URL}}';
+        evo.config.which_browser = '{{evo()->getConfig('which_browser')}}';
+        window.sMultisite = window.sMultisite || {};
+        window.sMultisite.lang = {!!json_encode(Illuminate\Support\Arr::only(
+            __('sMultisite::global'),
+            ['check_fields', 'not_saved']
+        ))!!};
     </script>
-    @if(isset($_SESSION['sMultisite.refresh']) && $_SESSION['sMultisite.refresh'])
-        @unset($_SESSION['sMultisite.refresh'])
-        <script>parent.location.reload();</script>
-    @endif
+    <script src="media/script/main.js"></script>
+    <script src="{{asset('site/smultisite.js.main.js')}}"></script>
+    @stack('scripts.top')
+    {!!EvolutionCMS()->getRegisteredClientStartupScripts()!!}
+</head>
+<body class="{{ManagerTheme::getTextDir()}} {{ManagerTheme::getThemeStyle()}}" data-evocp="color">
+<h1 style="display:none"><i class="@lang('sMultisite::global.icon')"></i> {{$tabName}} @lang('sMultisite::global.title')</h1>
+<div x-data="sMultisite.sPinner('sSidebarPinned')" class="s-document">
+    @include('sMultisite::partials.menu')
+    <main :class="open?'ml-60':'ml-16'" class="flex-1 min-h-screen transition-all duration-300">
+        <header class="s-header">
+            <div class="flex items-center gap-2">{!!$tabIcon!!} <h2 class="s-header-title">{{$tabName}}</h2></div>
+            <div class="flex items-center gap-3">@section('header')@show</div>
+        </header>
+        @section('content')@show
+    </main>
+</div>
+<div x-data="{open:false}" @mouseenter="open=true" @mouseleave="open=false" :class="open ? 's-brand s-brand--open' : 's-brand'">
+    <div class="s-brand-logo">
+        <img src="{{asset('site/seigerit.svg')}}" alt="Seiger IT">
+    </div>
+    <template x-if="open">
+        <div x-transition.opacity class="s-brand-text">
+            <a href="https://seiger.github.io/sMultisite" target="_blank" class="s-brand-link">sMultisite</a>
+            &nbsp;|&nbsp;
+            <a href="https://seigerit.com" target="_blank" class="s-brand-link">Seiger IT</a>
+        </div>
+    </template>
+</div>
+<script src="{{asset('site/seigerit.tooltip.js')}}" defer></script>
+@push('scripts.bot')
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            @if(isset($_SESSION['sMultisite.refresh']) && trim($_SESSION['sMultisite.refresh'] ?? ''))
+                alertify.success("{{$_SESSION['sMultisite.refresh']}}", 10);
+                @unset($_SESSION['sMultisite.refresh'])
+            @endif
+            @if(session('success'))
+                alertify.success("{{session('success')}}", 10);
+            @endif
+            @if(session('error'))
+                alertify.error("{{session('error')}}", 10);
+            @endif
+            @if(session('refresh'))
+                @php($_SESSION['sMultisite.refresh'] = session('refresh'))
+                parent.location.reload();
+            @endif
+        });
+    </script>
 @endpush
+@stack('scripts.bot')
+@include('manager::partials.debug')
+{!!evo()->getRegisteredClientScripts()!!}
+</body>
+</html>
