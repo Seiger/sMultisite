@@ -22,6 +22,7 @@ installation for several independent sites managed from the same admin.
 
 - [x] Management of several sites from one admin panel.
 - [x] Adding new domains.
+- [x] Authorization on all domains when logging into the admin panel.
 
 ## Requirements
 - Evolution CMS **3.2.0+**
