@@ -74,7 +74,7 @@
                         return false;
                     },
                     oncancel: function () {
-                        alertify.notify("@lang('sSeo::global.action_cancelled')");
+                        alertify.notify("@lang('sMultisite::global.action_cancelled')");
                     }
                 })
                 .set('labels', {ok: "@lang('global.save')", cancel: "@lang('global.cancel')"})
@@ -83,7 +83,7 @@
                 .set('defaultFocus', 'cancel')
                 .set('notifier', 'delay', 5)
                 .show();
-            window.sSeo.queueLucide();
+            window.sMultisite.queueLucide();
         }
     </script>
 @endpush

@@ -1,4 +1,5 @@
 <?php return [
+    'action_cancelled' => 'Дію скасовано.',
     'add_help' => 'Добавить новый домен',
     'check_fields' => 'Внимание! Проверьте поля.',
     'configure' => 'Конфигурация',

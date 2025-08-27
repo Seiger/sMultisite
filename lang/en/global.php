@@ -1,4 +1,5 @@
 <?php return [
+    'action_cancelled' => 'Action cancelled.',
     'add_help' => 'Add a new domain',
     'check_fields' => 'WARNING! Check the fields.',
     'configure' => 'Configuration',
