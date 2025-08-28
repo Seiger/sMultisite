@@ -55,7 +55,9 @@
                         <p class="text-xs text-slate-500 darkness:text-slate-400 mt-1">@lang('global.unauthorizedpage_message')</p>
                     </div>
                 </div>
-                @if($domain->key != 'default')
+                @if($domain->key == 'default')
+                    <input name="domains[{{$domain->id}}][active]" value="1" type="hidden">
+                @else
                     <div class="grid grid-cols-12 gap-x-2 gap-y-4 items-start">
                         <label class="col-span-12 sm:col-span-2 text-sm font-medium text-slate-700 darkness:text-slate-300 pt-2 pr-2">
                             @lang('sMultisite::global.domain_on')

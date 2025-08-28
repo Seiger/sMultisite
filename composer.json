@@ -51,10 +51,10 @@
   "scripts": {
     "post-autoload-dump": [],
     "post-install-cmd": [
-      "@php core/artisan smultisite:publish"
+      "@php artisan smultisite:publish"
     ],
     "post-update-cmd": [
-      "@php core/artisan smultisite:publish"
+      "@php artisan smultisite:publish"
     ]
   }
 }
