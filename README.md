@@ -49,7 +49,7 @@ php artisan package:installrequire seiger/smultisite "*"
 ```
 
 ```console
-php artisan vendor:publish --provider="Seiger\sMultisite\sMultisiteServiceProvider"
+php artisan vendor:publish --tag="sMultisite"
 ```
 
 ```console

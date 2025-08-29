@@ -32,7 +32,7 @@ php artisan package:installrequire seiger/smultisite "*"
 ```
 
 ```console
-php artisan vendor:publish --provider="Seiger\sMultitisite\sMultsiteServiceProvider"
+php artisan vendor:publish --tag="sMultitisite"
 ```
 
 ```console

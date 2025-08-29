@@ -1,6 +1,8 @@
 <?php namespace Seiger\sMultisite;
 
+use EvolutionCMS\Facades\Console;
 use EvolutionCMS\ServiceProvider;
+use Illuminate\Support\Facades\Log;
 use Seiger\sMultisite\Console\PublishAssets;
 use Seiger\sMultisite\Facades\sMultisite as sMultisiteFacade;
 
@@ -42,6 +44,34 @@ class sMultisiteServiceProvider extends ServiceProvider
 
         // Create class alias for the facade
         class_alias(sMultisiteFacade::class, 'sMultisite');
+
+        // Update active css and js and correcting version
+        if ($this->app->runningInConsole()) {
+            if (in_array('package:discover', $_SERVER['argv'] ?? [], true)) {
+                static $done = false;
+                if ($done) return;
+                $done = true;
+
+                $current = 'dev-master';
+                try {
+                    $current = \Composer\InstalledVersions::getVersion('seiger/smultisite') ?? 'dev-master';
+                    $current = rtrim($current, '.0');
+                } catch (\Throwable) {}
+
+                $last = null;
+                try {
+                    $last = evo()->getConfig('sMultisiteVer');
+                } catch (\Throwable) {}
+
+                if ($current !== $last || $current == 'dev-master') {
+                    try {
+                        Console::call('smultisite:publish');
+                    } catch (\Throwable $e) {
+                        Log::info('sMultisite auto-publish failed: ' . $e->getMessage(), 'sMultisite');
+                    }
+                }
+            }
+        }
     }
 
     /**

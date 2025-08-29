@@ -44,7 +44,7 @@ class PublishAssets extends Command
             $fs->ensureDirectoryExists(public_path('assets/site'));
             $fs->put(
                 public_path('core/vendor/seiger/smultisite/config/sMultisiteCheck.php'),
-                "<?php return ['check_sMultisite' => true, 'sMultisiteVer' => '" . $ver . "'];"
+                "<?php return ['check_sMultisite' => true, 'sMultisiteVer' => '" . rtrim($ver, '.0') . "'];"
             );
         } catch (\Throwable) {
             // ignore if class not available
