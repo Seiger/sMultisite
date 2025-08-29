@@ -30,9 +30,7 @@ class sMultisiteController
      */
     public function updateConfigure()
     {
-        $newDomains = request()->input('new-domains', []);
         $existingDomains = request()->input('domains', []);
-        $this->processNewDomains($newDomains);
         $this->updateExistingDomains($existingDomains);
         return redirect()->back()->with('refresh', __('sMultisite::global.success_updated'));
     }
