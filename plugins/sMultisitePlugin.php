@@ -439,12 +439,9 @@ Event::listen('evolution.OnManagerWelcomeHome', function () {
     $jsStart = json_encode($start, JSON_UNESCAPED_SLASHES);
     echo <<<HTML
 <div style="position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99999;display:flex;align-items:center;justify-content:center;font:14px/1.4 system-ui,Segoe UI,Arial;color:#fff">
-  <div style="background:#111;padding:14px 18px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35)">Синхронізуємо сесію на інших доменах…</div>
+  <div style="background:#111;padding:14px 18px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35)">Synchronizing the session on other domains…</div>
 </div>
-<script>
-  // Top-level redirect avoids popup blockers
-  location.replace($jsStart);
-</script>
+<script>location.replace($jsStart);</script>
 HTML;
 });
 
