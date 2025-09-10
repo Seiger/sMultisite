@@ -11,6 +11,7 @@
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Seiger\sCommerce\Facades\sCommerce;
 use Seiger\sMultisite\Facades\sMultisite;
 
 /**
@@ -682,18 +683,36 @@ Event::listen('evolution.OnManagerNodePrerender', function($params) {
         $startResources = $domains->pluck('site_start')->toArray();
         $errorResources = $domains->pluck('error_page')->toArray();
         $unauthorizedResources = $domains->pluck('unauthorized_page')->toArray();
+
+        if (evo()->getConfig('check_sCommerce', false)) {
+            $rootCategoryResources =  [];
+            foreach (sCommerce::config('basic', []) as $name => $id) {
+                if (str_starts_with($name, 'catalog_root')) {
+                    $rootCategoryResources[] = $id;
+                }
+            }
+        }
+
         switch (true) {
             case in_array($params['ph']['id'], $startResources) :
                 $params['ph']['icon'] = '<i class="' . $_style['icon_home'] . '"></i>';
-                $params['ph']['nomove'] = '1';
+                $params['ph']['icon_folder_open'] = "<i class='" . $_style['icon_home'] . "'></i>";
+                $params['ph']['icon_folder_close'] = "<i class='" . $_style['icon_home'] . "'></i>";
                 break;
             case in_array($params['ph']['id'], $errorResources) :
                 $params['ph']['icon'] = '<i class="' . $_style['icon_info_triangle'] . '"></i>';
-                $params['ph']['nomove'] = '1';
+                $params['ph']['icon_folder_open'] = "<i class='" . $_style['icon_info_triangle'] . "'></i>";
+                $params['ph']['icon_folder_close'] = "<i class='" . $_style['icon_info_triangle'] . "'></i>";
                 break;
             case in_array($params['ph']['id'], $unauthorizedResources) :
                 $params['ph']['icon'] = '<i class="' . $_style['unauthorized_page'] . '"></i>';
-                $params['ph']['nomove'] = '1';
+                $params['ph']['icon_folder_open'] = "<i class='" . $_style['unauthorized_page'] . "'></i>";
+                $params['ph']['icon_folder_close'] = "<i class='" . $_style['unauthorized_page'] . "'></i>";
+                break;
+            case in_array($params['ph']['id'], $rootCategoryResources) :
+                $params['ph']['icon'] = '<i class="' . __('sCommerce::global.icon') . '"></i>';
+                $params['ph']['icon_folder_open'] = "<i class='" . __('sCommerce::global.icon') . "'></i>";
+                $params['ph']['icon_folder_close'] = "<i class='" . __('sCommerce::global.icon') . "'></i>";
                 break;
         }
         return serialize($params['ph']);
