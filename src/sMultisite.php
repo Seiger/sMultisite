@@ -1,6 +1,9 @@
 <?php namespace Seiger\sMultisite;
 
+use EvolutionCMS\Facades\UrlProcessor;
+use EvolutionCMS\Models\SiteContent;
 use Illuminate\Support\Facades\Cache;
+use Seiger\sCommerce\Facades\sCommerce;
 use Seiger\sMultisite\Models\sMultisite as SMultisiteModel;
 
 /**
@@ -107,30 +110,53 @@ class sMultisite
      */
     public function domainsTree(): void
     {
-        $domainIds = [];
-        $domainBaseIds = evo()->getChildIds(0, 1);
+        $resources = SiteContent::all();
+        foreach ($resources as $row) {
+            if ((bool)evo()->getConfig('use_alias_path') && $row->parent > 0) {
+                $parent = $row->parent;
+                $path = $allAliases[$parent];
+
+                while (isset(UrlProcessor::getFacadeRoot()->aliasListing[$parent]) && (int)UrlProcessor::getFacadeRoot()->aliasListing[$parent]['alias_visible'] === 0) {
+                    $path = UrlProcessor::getFacadeRoot()->aliasListing[$parent]['path'];
+                    $parent = UrlProcessor::getFacadeRoot()->aliasListing[$parent]['parent'];
+                }
+                $allAliases[$row->getKey()] = $path . '/' . $row->alias;
+            } else {
+                $allAliases[$row->getKey()] = $row->alias;
+            }
+        }
+
         $domains = SMultisiteModel::all();
         $multisiteResources = $domains->pluck('resource')->toArray();
 
         // Exclude existing multisite resources from the base IDs
         if (count($multisiteResources)) {
-            $domainBaseIds = array_diff($domainBaseIds, $multisiteResources);
+            foreach ($multisiteResources as $mr) {
+                unset($allAliases[$mr]);
+            }
         }
-
-        // Collect all resource IDs for the domains
-        foreach ($domainBaseIds as $domainBaseId) {
-            $domainIds = array_merge($domainIds, evo()->getChildIds($domainBaseId));
-        }
-
-        // Cache default resources
-        Cache::forget('sMultisite-default-resources');
-        Cache::rememberForever('sMultisite-default-resources', fn() => $domainIds);
 
         // Cache resources for each domain
         foreach ($domains as $domain) {
-            $domainIds = evo()->getChildIds($domain->resource);
+            if ($domain->key === 'default') {
+                $domainBaseIds = evo()->getChildIds(0, 1);
+                foreach ($domainBaseIds as $als => $dbid) {
+                    if (!in_array($dbid, $multisiteResources)) {
+                        $domainIds[$als] = $dbid;
+                        $domainIds = array_merge($domainIds, evo()->getChildIds($dbid));
+                    }
+                }
+            } else {
+                $domainIds = evo()->getChildIds($domain->resource);
+            }
+
+            $aliases = [];
+            foreach ($domainIds as $id) {
+                $aliases[trim($allAliases[$id] ?? $id, '/')] = $id;
+            }
+
             Cache::forget('sMultisite-' . $domain->key . '-resources');
-            Cache::rememberForever('sMultisite-' . $domain->key . '-resources', fn() => $domainIds);
+            Cache::rememberForever('sMultisite-' . $domain->key . '-resources', fn() => $aliases);
         }
     }
 }
