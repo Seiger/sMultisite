@@ -67,7 +67,7 @@ class sMultisiteServiceProvider extends ServiceProvider
                     try {
                         Console::call('smultisite:publish');
                     } catch (\Throwable $e) {
-                        Log::log('sMultisite auto-publish failed: ' . $e->getMessage());
+                        Log::info('sMultisite auto-publish failed: ' . $e->getMessage());
                     }
                 }
             }
