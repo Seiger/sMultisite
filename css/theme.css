@@ -8,6 +8,7 @@
     --border-color: #e2e6ee;
     --focus-ring: 0 0 0 3px rgba(59,130,246,.35);
     --brand-color: #0057c7;
+    --brand-accent: #60a5fa;
     --brand-fore: #ffffff;
 
     --valid-color: #22c55e;
@@ -33,6 +34,7 @@ body.darkness {
     --border-color: #2a2f3a;
     --focus-ring: 0 0 0 3px rgba(59,130,246,.45);
     --brand-color: #0057c7;
+    --brand-accent: #60a5fa;
     --brand-fore: #0b1a2f;
 
     --valid-color: #4ade80;

@@ -40,6 +40,7 @@ Event::listen('evolution.OnLoadSettings', function($params) {
     }
     evo()->setConfig('site_key', 'default');
     evo()->setConfig('site_root', 0);
+    evo()->setConfig('site_color', '#60a5fa');
     $domain = \Seiger\sMultisite\Models\sMultisite::whereDomain($host)->whereActive(1)->first();
     if ($domain) {
         evo()->setConfig('site_key', $domain->key);
@@ -48,6 +49,7 @@ Event::listen('evolution.OnLoadSettings', function($params) {
         evo()->setConfig('error_page', $domain->error_page);
         evo()->setConfig('unauthorized_page', $domain->unauthorized_page);
         evo()->setConfig('site_root', (int)$domain->resource);
+        evo()->setConfig('site_color', $domain->site_color);
     }
     $aliasListing = Cache::get('sMultisite-' . evo()->getConfig('site_key', 'default') . '-resources') ?? [];
     if (is_array($aliasListing)) {

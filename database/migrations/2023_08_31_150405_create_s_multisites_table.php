@@ -24,6 +24,7 @@ class CreateSMultisitesTable extends Migration
             $table->integer('site_start')->default(0);
             $table->integer('error_page')->default(0);
             $table->integer('unauthorized_page')->default(0);
+            $table->string('site_color', 50)->default('#60a5fa');
             $table->timestamps();
         });
 

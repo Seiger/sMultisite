@@ -44,7 +44,8 @@ class sMultisite extends Model
         'site_name',
         'site_start',
         'error_page',
-        'unauthorized_page'
+        'unauthorized_page',
+        'site_color',
     ];
 
     /**

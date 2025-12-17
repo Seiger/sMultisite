@@ -1,8 +1,8 @@
 <div class="max-w-7xl mx-auto py-3 px-6" x-data="sMultisite.sPinner('domain{{ucfirst($item->key)}}')">
     <div class="s-meta-block-head">
-        <span @click="togglePin" class="s-meta-block-btn">
+        <span @click="togglePin" class="s-meta-block-btn bg-[var(--brand-accent)]" @if(trim($domain->site_color ?? '')) @style(['background-color: ' . $domain->site_color]) @endif>
             <div class="flex items-center gap-2">
-                <svg data-lucide="link-2" class="w-5 h-5 text-sky-500"></svg>
+                <svg data-lucide="link-2" class="w-5 h-5 text-[var(--brand-color)]"></svg>
                 <span class="font-semibold text-base text-slate-700 darkness:text-slate-200">{{$item->site_name??''}}</span>
                 <sup><b>{{$domain->key}}</b></sup>
             </div>
@@ -53,6 +53,15 @@
                     <div class="col-span-12 sm:col-span-10">
                         <input name="domains[{{$domain->id}}][unauthorized_page]" value="{{$domain->unauthorized_page}}" type="text"  class="w-full rounded-md border border-slate-300 darkness:border-slate-600 bg-white darkness:bg-slate-800 text-slate-800 darkness:text-white px-3 py-2 focus:ring-2 focus:ring-blue-500" onchange="documentDirty=true;">
                         <p class="text-xs text-slate-500 darkness:text-slate-400 mt-1">@lang('global.unauthorizedpage_message')</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-12 gap-x-2 gap-y-4 items-start">
+                    <label class="col-span-12 sm:col-span-2 text-sm font-medium text-slate-700 darkness:text-slate-300 pt-2 pr-2">
+                        @lang('sMultisite::global.site_color')
+                    </label>
+                    <div class="col-span-12 sm:col-span-10">
+                        <input name="domains[{{$domain->id}}][site_color]" value="{{$domain->site_color}}" type="text"  class="w-full rounded-md border border-slate-300 darkness:border-slate-600 bg-white darkness:bg-slate-800 text-slate-800 darkness:text-white px-3 py-2 focus:ring-2 focus:ring-blue-500" onchange="documentDirty=true;">
+                        <p class="text-xs text-slate-500 darkness:text-slate-400 mt-1">@lang('sMultisite::global.hex_color_may_be_used_some_modules')</p>
                     </div>
                 </div>
                 @if($domain->key == 'default')

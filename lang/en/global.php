@@ -1,6 +1,7 @@
 <?php return [
     'action_cancelled' => 'Action cancelled.',
     'add_help' => 'Add a new domain',
+    'site_color' => 'Site color',
     'check_fields' => 'WARNING! Check the fields.',
     'configure' => 'Configuration',
     'configure_help' => 'Configure site domains.',
@@ -16,6 +17,7 @@
     'domain_key_help' => 'When choosing a key, be careful, the key is entered in English in lowercase and only letters. <b>Attention, the key cannot be changed</b>.',
     'empty_field' => 'the field must not be empty.',
     'error_empty_fields' => 'Error: All fields must be filled!',
+    'hex_color_may_be_used_some_modules' => 'This <b>HEX color</b> may be used by some modules to indicate resources that belong to the selected domain.',
     'hide_from_tree' => 'Hide in the resource tree:',
     'hide_from_tree_help' => 'If this box is checked, domain resources will not be displayed in the resource tree. Only possible if <b>domain is disabled</b>.',
     'icon' => 'fa fa-dice-d20',
