@@ -32,7 +32,7 @@ if (!function_exists('ms_b64u_json')) {
  * Order of precedence:
  *  1) SMULTI_SSO_SECRET from environment (recommended: same across domains).
  *  2) If absent — read/write core/storage/ms_sso/secret.key (shared FS).
- *  3) Derive the final key by HMAC with SESSION_COOKIE_NAME as "info"/salt.
+ *  3) Normalize the final key to 32 raw bytes (SHA-256).
  *
  * @return string Raw bytes (string) to be used as HMAC key.
  */
@@ -42,6 +42,9 @@ if (!function_exists('ms_sso_secret')) {
         if ($sec) return $sec;
 
         $base = getenv('SMULTI_SSO_SECRET');
+        if ((!$base || $base === '') && function_exists('env')) {
+            $base = env('SMULTI_SSO_SECRET');
+        }
         if (!$base || strlen($base) < 32) {
             $dir  = rtrim(EVO_CORE_PATH ?? __DIR__, '/') . '/storage/ms_sso';
             $file = $dir . '/secret.key';
@@ -54,10 +57,10 @@ if (!function_exists('ms_sso_secret')) {
             }
         }
 
-        $cookieName = defined('SESSION_COOKIE_NAME') ? SESSION_COOKIE_NAME : session_name();
-        // HKDF-like derivation: bind to cookie name (makes cross-install reuse safer).
-        $derived = hash_hmac('sha256', $cookieName, $base, true);
-        return $sec = $derived;
+        // Important: do not bind the signing key to SESSION_COOKIE_NAME.
+        // In multi-domain setups cookie names often differ between domains,
+        // which would make SSO tokens unverifiable and produce "Invalid/expired".
+        return $sec = hash('sha256', (string)$base, true);
     }
 }
 
@@ -86,16 +89,17 @@ if (!function_exists('ms_sso_token_make')) {
  * @return array|null Payload if valid; null otherwise
  */
 if (!function_exists('ms_sso_token_parse')) {
-    function ms_sso_token_parse(string $jwt): ?array {
-        if (!preg_match('~^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$~', $jwt)) return null;
+    function ms_sso_token_parse(string $jwt, ?string &$err = null): ?array {
+        $err = null;
+        if (!preg_match('~^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+$~', $jwt)) { $err = 'format'; return null; }
         [$h, $p, $s] = explode('.', $jwt, 3);
         $calc = ms_b64u(hash_hmac('sha256', "$h.$p", ms_sso_secret(), true));
-        if (!hash_equals($calc, $s)) return null;
+        if (!hash_equals($calc, $s)) { $err = 'signature'; return null; }
         $payload = json_decode(base64_decode(strtr($p, '-_', '+/')), true);
-        if (!$payload || !is_array($payload)) return null;
+        if (!$payload || !is_array($payload)) { $err = 'payload'; return null; }
         $now = time();
-        if (isset($payload['nbf']) && $payload['nbf'] > $now) return null;
-        if (isset($payload['exp']) && $payload['exp'] < $now) return null;
+        if (isset($payload['nbf']) && $payload['nbf'] > $now) { $err = 'nbf'; return null; }
+        if (isset($payload['exp']) && $payload['exp'] < $now) { $err = 'exp'; return null; }
         return $payload;
     }
 }

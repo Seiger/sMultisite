@@ -332,7 +332,7 @@ Event::listen('evolution.OnBeforeLoadDocumentObject', function () {
     $scheme = $https ? 'https' : 'http';
     $slow   = isset($_GET['slow']);
     $cookie = defined('SESSION_COOKIE_NAME') ? SESSION_COOKIE_NAME : session_name();
-    $rootDom = getenv('MS_SESSION_ROOT_DOMAIN') ?: '';
+    $rootDom = getenv('MS_SESSION_ROOT_DOMAIN') ?: (function_exists('env') ? (string)env('MS_SESSION_ROOT_DOMAIN', '') : '');
 
     $noStore = static function () {
         header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -447,8 +447,10 @@ Event::listen('evolution.OnBeforeLoadDocumentObject', function () {
         $code   = (string)($_GET['c'] ?? '');
         $return = (string)($_GET['return'] ?? '/');
 
-        $data = ms_sso_token_parse($code);
+        $err = null;
+        $data = ms_sso_token_parse($code, $err);
         if (!$data || ($data['mode'] ?? '') !== 'login' || empty($data['sid'])) {
+            error_log('[sMultisite SSO] RECEIVER login invalid token err=' . ($err ?? 'unknown') . ' host=' . ($_SERVER['HTTP_HOST'] ?? '') . ' sfm=' . ($_SERVER['HTTP_SEC_FETCH_MODE'] ?? ''));
             header('HTTP/1.1 400 Bad Request'); echo 'Invalid/expired'; exit;
         }
 
@@ -477,8 +479,10 @@ Event::listen('evolution.OnBeforeLoadDocumentObject', function () {
         $code   = (string)($_GET['c'] ?? '');
         $return = (string)($_GET['return'] ?? '/');
 
-        $data = ms_sso_token_parse($code);
+        $err = null;
+        $data = ms_sso_token_parse($code, $err);
         if (!$data || ($data['mode'] ?? '') !== 'logout') {
+            error_log('[sMultisite SSO] RECEIVER logout invalid token err=' . ($err ?? 'unknown') . ' host=' . ($_SERVER['HTTP_HOST'] ?? '') . ' sfm=' . ($_SERVER['HTTP_SEC_FETCH_MODE'] ?? ''));
             header('HTTP/1.1 400 Bad Request'); echo 'Invalid/expired'; exit;
         }
 
