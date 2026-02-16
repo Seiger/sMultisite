@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto py-3 px-6" x-data="sMultisite.sPinner('domain{{ucfirst($item->key)}}')">
     <div class="s-meta-block-head">
-        <span @click="togglePin" class="s-meta-block-btn bg-[var(--brand-accent)]" @if(trim($domain->site_color ?? '')) @style(['background-color: ' . $domain->site_color]) @endif>
+        <span @click="toggle()" class="s-meta-block-btn bg-[var(--brand-accent)]" @if(trim($domain->site_color ?? '')) @style(['background-color: ' . $domain->site_color]) @endif>
             <div class="flex items-center gap-2">
                 <svg data-lucide="link-2" class="w-5 h-5 text-[var(--brand-color)]"></svg>
                 <span class="font-semibold text-base text-slate-700 darkness:text-slate-200">{{$item->site_name??''}}</span>
@@ -102,3 +102,41 @@
         </div>
     </div>
 </div>
+@push('scripts.bot')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            function getContrastColor(r, g, b) {
+                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                return luminance > 0.5 ? '#0f172a' : '#ffffff';
+            }
+
+            function applyContrast(el) {
+                const bg = getComputedStyle(el).backgroundColor || '';
+                const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+
+                if (!m) return;
+
+                const r = parseInt(m[1], 10);
+                const g = parseInt(m[2], 10);
+                const b = parseInt(m[3], 10);
+
+                el.style.color = getContrastColor(r, g, b);
+            }
+
+            function run() {
+                document.querySelectorAll('.s-meta-block-btn').forEach(applyContrast);
+            }
+
+            run();
+
+            const observer = new MutationObserver(run);
+            observer.observe(document.body, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ['style']
+            });
+        });
+    </script>
+@endpush
