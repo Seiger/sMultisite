@@ -98,37 +98,25 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /**
- * Handle pinning and hover behavior.
+ * Sidebar pin toggle behavior.
  */
 window.sMultisite.sPinner = function sPinner(key) {
-    const saved = localStorage.getItem(key) === 'true';
     return {
-        pinned: saved,
-        open: saved,
-        skipLeave: false,
-        togglePin() {
-            this.pinned = !this.pinned;
-            this.open = this.pinned;
-            this.skipLeave = true;
-            setTimeout(() => this.skipLeave = false, 50);
-            localStorage.setItem(key, this.pinned);
+        open: false,
+
+        init() {
+            const v = localStorage.getItem(key);
+            this.open = (v === 'true' || v === '1');
             window.sMultisite.queueLucide();
         },
-        handleEnter() {
-            if (!this.pinned) {
-                this.open = true;
-                window.sMultisite.queueLucide();
-            }
+
+        toggle() {
+            this.open = !this.open;
+            localStorage.setItem(key, this.open ? '1' : '0');
+            window.sMultisite.queueLucide();
         },
-        handleLeave() {
-            if (this.skipLeave) return;
-            if (!this.pinned) {
-                this.open = false;
-                window.sMultisite.queueLucide();
-            }
-        },
-    }
-}
+    };
+};
 
 /**
  * Queue Lucide icon rendering.

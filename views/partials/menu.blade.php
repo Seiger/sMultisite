@@ -13,7 +13,12 @@
             <span x-show="open">@lang('sMultisite::global.configure')</span>
         </a>
     </nav>
-    <span @click="togglePin" role="button" tabindex="0" class="s-pin-btn" :class="open ? 'left-24' : 'left-4'" title="Pin sidebar / Unpin sidebar">
-        <i :data-lucide="pinned ? 'pin-off' : 'pin'" class="w-4 h-4 pointer-events-none"></i>
+    <span @click="toggle()" role="button" tabindex="0" class="s-pin-btn" :class="open ? 'left-24' : 'left-4'" title="Toggle sidebar">
+        <template x-if="open">
+            @svg('tabler-pinned', 'w-4 h-4 pointer-events-none')
+        </template>
+        <template x-if="!open">
+            @svg('tabler-pin', 'w-4 h-4 pointer-events-none')
+        </template>
     </span>
 </aside>
