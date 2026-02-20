@@ -1,12 +1,23 @@
 <?php
 /**
- * Plugin for Seiger Multisite Tools to Evolution CMS.
+ * Seiger Multisite Tools plugin for Evolution CMS.
  *
- * SSO across multiple domains living in the same Evolution CMS instance:
- * - After Manager login: propagates the session to other domains.
- * - After Manager logout: clears the session on other domains.
- * - Uses short-lived signed tokens (HS256) and a per-login "run plan" (steps).
- * - Runs in the same tab via location.replace() to avoid popup blockers.
+ * Provides multisite runtime configuration and Manager UX improvements:
+ * - Switches Evolution config (site_key/start pages) by the current domain.
+ * - Namespaces page cache keys per site_key.
+ * - Rebuilds cached multi-domain tree on cache refresh.
+ * - Adjusts Manager document URLs to point to the owning domain.
+ * - Enhances Manager tree with extra domain roots and special node icons.
+ *
+ * Also provides optional cross-domain Manager SSO (single sign-on):
+ * - After Manager login: propagates the session SID to other domains.
+ * - After Manager logout: clears the session SID on other domains.
+ * - Uses short-lived signed tokens (HS256) and a per-run "plan" (steps).
+ * - Executes in the same tab via location.replace() to avoid popup blockers.
+ *
+ * Endpoints (friendly_url_suffix is respected):
+ * - /_ms-run, /_ms-run-logout       Runner endpoints (step sequencer)
+ * - /_ms-sso, /_ms-sso-logout       Receiver endpoints (set/unset SID)
  */
 
 use EvolutionCMS\Facades\UrlProcessor;
@@ -17,6 +28,16 @@ use Seiger\sMultisite\Facades\sMultisite;
 
 // Load SSO functions if needed
 if (!function_exists('ms_sso_load_functions')) {
+    /**
+     * Load SSO helper functions once.
+     *
+     * The helpers are expected at: ../functions/sso.php
+     * - ms_sso_token_make()
+     * - ms_sso_token_parse()
+     * - ms_run_put(), ms_run_get(), ms_run_touch(), ms_run_del()
+     *
+     * @return void
+     */
     function ms_sso_load_functions(): void {
         static $loaded = false;
         if (!$loaded) {
@@ -30,8 +51,18 @@ if (!function_exists('ms_sso_load_functions')) {
 }
 
 /**
- * OnLoadSettings:
- * Switch Evolution config by domain (site_key, start pages), and hydrate documentListing from cache.
+ * OnLoadSettings
+ *
+ * Switches Evolution configuration by domain:
+ * - site_key, site_root, site_name
+ * - site_start, error_page, unauthorized_page
+ * - site_color
+ *
+ * Also hydrates UrlProcessor::documentListing from cache for the selected site_key.
+ *
+ * @param array $params Event payload (may include ['config']['setHost'] override)
+ *
+ * @return void
  */
 Event::listen('evolution.OnLoadSettings', function($params) {
     $host = $_SERVER['HTTP_HOST'];
@@ -58,9 +89,13 @@ Event::listen('evolution.OnLoadSettings', function($params) {
 });
 
 /**
- * OnWebPageInit:
- * Enforce resource access per domain on the front-end.
- * Whitelist SSO endpoints to avoid accidental 404.
+ * OnWebPageInit
+ *
+ * Enforces resource access per domain on the front-end:
+ * - Compares evo()->documentIdentifier against cached allowed resource IDs for the current site_key.
+ * - Whitelists SSO service endpoints to avoid accidental 404 / access blocks.
+ *
+ * @return void
  */
 Event::listen('evolution.OnWebPageInit', function () {
     $uri = strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
@@ -76,8 +111,16 @@ Event::listen('evolution.OnWebPageInit', function () {
 });
 
 /**
- * OnMakeDocUrl:
- * For Manager links, prefix URLs with the appropriate domain.
+ * OnMakeDocUrl
+ *
+ * For Manager links, prefixes document URLs with the domain that owns the resource root.
+ * This allows correct cross-domain navigation from Manager UI.
+ *
+ * @param array $params Event payload:
+ *                     - int    $params['id']  Document ID
+ *                     - string $params['url'] Generated (relative) URL
+ *
+ * @return string|null Prefixed URL for Manager context, otherwise null to keep default behavior
  */
 Event::listen('evolution.OnMakeDocUrl', function($params) {
     if (evo()->isBackend()) {
@@ -100,24 +143,42 @@ Event::listen('evolution.OnMakeDocUrl', function($params) {
 });
 
 /**
- * OnMakePageCacheKey:
- * Namespaces page cache by site_key.
+ * OnMakePageCacheKey
+ *
+ * Namespaces page cache keys by site_key to prevent collisions across domains.
+ *
+ * @param array $params Event payload:
+ *                     - string $params['hash'] Base cache key hash
+ *
+ * @return string
  */
 Event::listen('evolution.OnMakePageCacheKey', function($params) {
     return evo()->getConfig('site_key', 'default') . '_' . $params['hash'];
 });
 
 /**
- * OnCacheUpdate:
- * Rebuild cached multi-domain tree.
+ * OnCacheUpdate
+ *
+ * Rebuilds the cached multi-domain tree/listings.
+ *
+ * @param array $params Event payload (unused)
+ *
+ * @return void
  */
 Event::listen('evolution.OnCacheUpdate', function($params) {
     sMultisite::domainsTree();
 });
 
 /**
- * OnDocFormPrerender:
- * Ensure System Settings panel loads values from the domain the document belongs to.
+ * OnDocFormPrerender
+ *
+ * Ensures the System Settings panel loads values for the domain the document belongs to.
+ * It resolves a host for the given document ID and triggers OnLoadSettings with setHost override.
+ *
+ * @param array $params Event payload:
+ *                     - int|string $params['id'] Document ID being edited
+ *
+ * @return void
  */
 Event::listen('evolution.OnDocFormPrerender', function($params) {
     $config = array_merge(evo()->config, ['setHost' => parse_url(url($params['id']), PHP_URL_HOST)]);
@@ -125,8 +186,14 @@ Event::listen('evolution.OnDocFormPrerender', function($params) {
 });
 
 /**
- * OnManagerMenuPrerender:
- * Adds “sMultisite” entry to Tools (for users with 'settings' permission).
+ * OnManagerMenuPrerender
+ *
+ * Adds “sMultisite” entry to Tools for users with 'settings' permission.
+ *
+ * @param array $params Event payload:
+ *                     - array $params['menu'] Current Manager menu structure
+ *
+ * @return string|null Serialized updated menu, or null to keep default behavior
  */
 Event::listen('evolution.OnManagerMenuPrerender', function($params) {
     if (evo()->hasPermission('settings')) {
@@ -148,9 +215,16 @@ Event::listen('evolution.OnManagerMenuPrerender', function($params) {
 });
 
 /**
- * OnManagerLogin:
+ * OnManagerLogin
+ *
  * After successful Manager login, builds a "run plan" to authenticate on other domains.
- * Stores runId in session; the plan is executed from OnManagerWelcomeHome.
+ * Stores runId in PHP session; the plan is executed from evolution.OnManagerWelcomeHome.
+ *
+ * Notes:
+ * - Uses current session_id() as SID value to propagate.
+ * - Tokens are short-lived and include mode/login, sid, and host.
+ *
+ * @return void
  */
 Event::listen('evolution.OnManagerLogin', function () {
     ms_sso_load_functions();
@@ -196,9 +270,16 @@ Event::listen('evolution.OnManagerLogin', function () {
 });
 
 /**
- * OnManagerLogout:
+ * OnManagerLogout
+ *
  * Builds a "run plan" to logout on other domains.
- * Stores runId in a cookie so we can start from OnManagerWelcomeHome.
+ * Stores runId in a cookie so we can start from evolution.OnManagerWelcomeHome (session may be gone).
+ *
+ * Notes:
+ * - Tokens are short-lived and include mode/logout and host.
+ * - Cookie is intentionally not HttpOnly to allow JS-less redirections.
+ *
+ * @return void
  */
 Event::listen('evolution.OnManagerLogout', function () {
     ms_sso_load_functions();
@@ -237,9 +318,12 @@ Event::listen('evolution.OnManagerLogout', function () {
 });
 
 /**
- * OnManagerWelcomeHome:
+ * OnManagerWelcomeHome
+ *
  * Kicks off the run (login/logout) in the same tab using location.replace().
- * We pass "ret" (final Manager URL) so the flow comes back automatically.
+ * Passes "ret" (final Manager URL) so the flow returns automatically.
+ *
+ * @return void
  */
 Event::listen('evolution.OnManagerWelcomeHome', function () {
     ms_sso_load_functions();
@@ -296,11 +380,17 @@ HTML;
 });
 
 /**
- * OnBeforeLoadDocumentObject:
+ * OnBeforeLoadDocumentObject
+ *
  * Implements service endpoints:
- *  - /_ms-run, /_ms-run-logout  → runners (sequence executor across domains)
- *  - /_ms-sso, /_ms-sso-logout  → receivers (set/unset SID and bounce to next/ret)
- * Has <meta refresh> fallback and blocks preloads to avoid consuming tokens prematurely.
+ * - /_ms-run, /_ms-run-logout  Runner endpoints (sequence executor across domains)
+ * - /_ms-sso, /_ms-sso-logout  Receiver endpoints (set/unset SID and bounce to next/ret)
+ *
+ * Security/behavior:
+ * - Has <meta refresh> fallback for no-JS.
+ * - Blocks speculative preloads/prerenders to avoid consuming one-shot tokens prematurely.
+ *
+ * @return void
  */
 Event::listen('evolution.OnBeforeLoadDocumentObject', function () {
     $uri    = strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
@@ -503,8 +593,37 @@ Event::listen('evolution.OnBeforeLoadDocumentObject', function () {
 });
 
 /**
- * OnManagerTreeRender:
- * Renders extra root nodes for each domain in the Resources tree.
+ * OnManagerTreePrerender
+ *
+ * Forces Manager tree context to the "default" domain settings.
+ * This avoids Manager tree inconsistencies when switching documents/domains.
+ *
+ * @param array $params Event payload (unused)
+ *
+ * @return void
+ */
+Event::listen('evolution.OnManagerTreePrerender', function($params) {
+    $domain = \Seiger\sMultisite\Models\sMultisite::where('key', 'default')->first();
+    if ($domain) {
+        evo()->setConfig('site_key', $domain->key);
+        evo()->setConfig('site_name', $domain->site_name);
+        evo()->setConfig('site_start', $domain->site_start);
+        evo()->setConfig('error_page', $domain->error_page);
+        evo()->setConfig('unauthorized_page', $domain->unauthorized_page);
+        evo()->setConfig('site_root', (int)$domain->resource);
+        evo()->setConfig('site_color', $domain->site_color);
+    }
+});
+
+/**
+ * OnManagerTreeRender
+ *
+ * Renders extra root nodes for each domain in the Resources tree (except default).
+ * Each domain is rendered as a "rootNode" container with its own treeRoot placeholder.
+ *
+ * @param array $params Event payload (unused)
+ *
+ * @return string|null HTML markup for extra roots, or null to keep default behavior
  */
 Event::listen('evolution.OnManagerTreeRender', function($params) {
     $tree = '';
@@ -528,11 +647,22 @@ Event::listen('evolution.OnManagerTreeRender', function($params) {
 });
 
 /**
- * OnManagerNodePrerender:
- * Sets special icons and disables move for domain's key pages (home/error/unauthorized).
+ * OnManagerNodePrerender
+ *
+ * Sets special icons and disables move for domain key pages:
+ * - home (site_start)
+ * - error_page
+ * - unauthorized_page
+ *
+ * Also optionally marks sCommerce catalog root categories if enabled (check_sCommerce).
+ *
+ * @param array $params Event payload:
+ *                     - array $params['ph'] Placeholder array for a node (must be returned serialized)
+ *
+ * @return string|null Serialized placeholders, or null to keep default behavior
  */
 Event::listen('evolution.OnManagerNodePrerender', function($params) {
-    $domains = \Seiger\sMultisite\Models\sMultisite::where('hide_from_tree', 0)->whereNot('key', 'default')->get();
+    $domains = \Seiger\sMultisite\Models\sMultisite::where('hide_from_tree', 0)->get();
     if ($domains) {
         $_style = ManagerTheme::getStyle();
         $startResources = $domains->pluck('site_start')->toArray();
@@ -575,8 +705,15 @@ Event::listen('evolution.OnManagerNodePrerender', function($params) {
 });
 
 /**
- * OnManagerNodeRender:
- * Hides root resources that act as domain containers from the tree.
+ * OnManagerNodeRender
+ *
+ * Hides domain container root resources from the tree.
+ * If the current node ID is one of sMultisite domain container resources, returns a blank string.
+ *
+ * @param array $params Event payload:
+ *                     - int $params['id'] Node document ID
+ *
+ * @return string|null Blank string to hide, or null to keep default behavior
  */
 Event::listen('evolution.OnManagerNodeRender', function($params) {
     $domains = \Seiger\sMultisite\Models\sMultisite::all();
