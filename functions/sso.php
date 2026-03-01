@@ -172,6 +172,53 @@ if (!function_exists('ms_run_touch')) {
 }
 
 /**
+ * Atomically claim run start for a short period to prevent duplicate dispatch
+ * from concurrent manager requests.
+ *
+ * @param string $id  Run identifier
+ * @param int    $ttl Lock lifetime in seconds
+ * @return bool true if claim acquired, false if already claimed recently
+ */
+if (!function_exists('ms_run_claim_start')) {
+    function ms_run_claim_start(string $id, int $ttl = 30): bool {
+        $safe = preg_replace('~[^A-Za-z0-9_\-]~', '', $id);
+        if ($safe === '') {
+            return false;
+        }
+
+        $path = ms_run_store_dir() . '/' . $safe . '.start';
+        $now = time();
+
+        $fp = @fopen($path, 'c+');
+        if (!is_resource($fp)) {
+            return false;
+        }
+
+        if (!@flock($fp, LOCK_EX)) {
+            @fclose($fp);
+            return false;
+        }
+
+        $raw = stream_get_contents($fp);
+        $claimedAt = (int)trim((string)$raw);
+        if ($claimedAt > 0 && ($claimedAt + $ttl) > $now) {
+            @flock($fp, LOCK_UN);
+            @fclose($fp);
+            return false;
+        }
+
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, (string)$now);
+        fflush($fp);
+        @flock($fp, LOCK_UN);
+        @fclose($fp);
+
+        return true;
+    }
+}
+
+/**
  * Delete run plan after completion.
  *
  * @param string $id Run identifier
@@ -179,8 +226,13 @@ if (!function_exists('ms_run_touch')) {
  */
 if (!function_exists('ms_run_del')) {
     function ms_run_del(string $id): void {
-        $path = ms_run_store_dir() . '/' . preg_replace('~[^A-Za-z0-9_\-]~', '', $id) . '.json';
-        @unlink($path);
+        $safe = preg_replace('~[^A-Za-z0-9_\-]~', '', $id);
+        if ($safe === '') {
+            return;
+        }
+
+        @unlink(ms_run_store_dir() . '/' . $safe . '.json');
+        @unlink(ms_run_store_dir() . '/' . $safe . '.start');
     }
 }
 
