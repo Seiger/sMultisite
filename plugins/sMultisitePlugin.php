@@ -907,9 +907,9 @@ Event::listen('evolution.OnManagerNodePrerender', function($params) {
                 $params['ph']['icon_folder_close'] = "<i class='" . $_style['unauthorized_page'] . "'></i>";
                 break;
             case in_array($params['ph']['id'], $rootCategoryResources) :
-                $params['ph']['icon'] = '<i class="' . __('sCommerce::global.icon') . '"></i>';
-                $params['ph']['icon_folder_open'] = "<i class='" . __('sCommerce::global.icon') . "'></i>";
-                $params['ph']['icon_folder_close'] = "<i class='" . __('sCommerce::global.icon') . "'></i>";
+                $params['ph']['icon'] = '<i class="fa fa-store"></i>';
+                $params['ph']['icon_folder_open'] = "<i class='fa fa-store'></i>";
+                $params['ph']['icon_folder_close'] = "<i class='fa fa-store'></i>";
                 break;
         }
         return serialize($params['ph']);
