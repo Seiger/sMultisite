@@ -340,7 +340,8 @@ Event::listen('evolution.OnManagerMenuPrerender', function($params) {
  * OnManagerLogin
  *
  * After successful Manager login, builds a "run plan" to authenticate on other domains.
- * Stores runId in PHP session; the plan is executed from evolution.OnManagerWelcomeHome.
+ * Stores runId in PHP session; the plan is executed from the first authenticated
+ * Manager page event after login.
  *
  * Notes:
  * - Uses current session_id() as SID value to propagate.
@@ -411,7 +412,8 @@ Event::listen('evolution.OnManagerLogin', function () {
  * OnManagerLogout
  *
  * Builds a "run plan" to logout on other domains.
- * Stores runId in a cookie so we can start from evolution.OnManagerWelcomeHome (session may be gone).
+ * Stores runId in a cookie so we can start from the next authenticated Manager
+ * page event (session may be gone).
  *
  * Notes:
  * - Tokens are short-lived and include mode/logout and host.
@@ -484,6 +486,29 @@ Event::listen('evolution.OnManagerMainFrameHeaderHTMLBlock', function () {
 
     $jsStart = json_encode($start, JSON_UNESCAPED_SLASHES);
     return "<script>if(!window.__msSsoStarted){window.__msSsoStarted=1;location.replace($jsStart);}</script>";
+});
+
+/**
+ * OnManagerPageInit
+ *
+ * Modern Evolution can return a Manager user to the last opened page instead
+ * of the welcome page. Start pending SSO runs from the first authenticated
+ * Manager page, not only from OnManagerWelcomeHome.
+ */
+Event::listen('evolution.OnManagerPageInit', function () {
+    $start = ms_sso_resolve_start_url();
+    if (!$start) {
+        return;
+    }
+
+    $jsStart = json_encode($start, JSON_UNESCAPED_SLASHES);
+    echo <<<HTML
+<div style="position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99999;display:flex;align-items:center;justify-content:center;font:14px/1.4 system-ui,Segoe UI,Arial;color:#fff">
+  <div style="background:#111;padding:14px 18px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35)">Synchronizing the session on other domains...</div>
+</div>
+<script>location.replace($jsStart);</script>
+HTML;
+    exit;
 });
 
 /**

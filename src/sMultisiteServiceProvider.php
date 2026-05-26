@@ -22,11 +22,12 @@ class sMultisiteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // SSO service endpoints must be routed before the frontend parser can
+        // stop disabled domains with the site-unavailable response.
+        $this->loadRoutesFrom(__DIR__.'/Http/routes.php');
+
         // Check if in Manager mode
         if (IN_MANAGER_MODE) {
-            // Load the package routes
-            $this->loadRoutesFrom(__DIR__.'/Http/routes.php');
-
             // Load migrations, views, translations only if necessary
             $this->loadMigrationsFrom(dirname(__DIR__) . '/database/migrations');
             $this->loadViewsFrom(dirname(__DIR__) . '/views', 'sMultisite');
