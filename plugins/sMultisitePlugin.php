@@ -457,25 +457,27 @@ Event::listen('evolution.OnManagerLogout', function () {
 /**
  * OnManagerWelcomeHome
  *
- * Kicks off the run (login/logout) in the same tab using location.replace().
- * Passes "ret" (final Manager URL) so the flow returns automatically.
+ * Kept intentionally empty for compatibility with older Evolution installs.
+ * SSO redirects are injected through OnManagerMainFrameHeaderHTMLBlock, because
+ * some Manager events render returned/echoed HTML as an alert message.
  *
  * @return void
  */
 Event::listen('evolution.OnManagerWelcomeHome', function () {
-    $start = ms_sso_resolve_start_url();
-    if (!$start) return;
-
-    $jsStart = json_encode($start, JSON_UNESCAPED_SLASHES);
-    echo <<<HTML
-<div style="position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99999;display:flex;align-items:center;justify-content:center;font:14px/1.4 system-ui,Segoe UI,Arial;color:#fff">
-  <div style="background:#111;padding:14px 18px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35)">Synchronizing the session on other domains…</div>
-</div>
-<script>location.replace($jsStart);</script>
-HTML;
+    return;
 });
 
 Event::listen('evolution.OnManagerMainFrameHeaderHTMLBlock', function () {
+    $start = ms_sso_resolve_start_url();
+    if (!$start) {
+        return '';
+    }
+
+    $jsStart = json_encode($start, JSON_UNESCAPED_SLASHES);
+    return "<script>if(!window.__msSsoStarted){window.__msSsoStarted=1;location.replace($jsStart);}</script>";
+});
+
+Event::listen('evolution.OnManagerLoginFormPrerender', function () {
     $start = ms_sso_resolve_start_url();
     if (!$start) {
         return '';
@@ -489,22 +491,24 @@ Event::listen('evolution.OnManagerMainFrameHeaderHTMLBlock', function () {
  * OnManagerPageInit
  *
  * Modern Evolution can return a Manager user to the last opened page instead
- * of the welcome page. Start pending SSO runs from the first authenticated
- * Manager page, not only from OnManagerWelcomeHome.
+ * of the welcome page. Login SSO can be started here with a real HTTP redirect
+ * before Manager renders; logout is handled by the login form event.
  */
 Event::listen('evolution.OnManagerPageInit', function () {
-    $start = ms_sso_resolve_start_url();
-    if (!$start) {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        @session_start();
+    }
+
+    if (empty($_SESSION['ms_run_login'])) {
         return;
     }
 
-    $jsStart = json_encode($start, JSON_UNESCAPED_SLASHES);
-    echo <<<HTML
-<div style="position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:99999;display:flex;align-items:center;justify-content:center;font:14px/1.4 system-ui,Segoe UI,Arial;color:#fff">
-  <div style="background:#111;padding:14px 18px;border-radius:10px;box-shadow:0 10px 24px rgba(0,0,0,.35)">Synchronizing the session on other domains...</div>
-</div>
-<script>location.replace($jsStart);</script>
-HTML;
+    $start = ms_sso_resolve_start_url();
+    if ($start === '') {
+        return;
+    }
+
+    header('Location: ' . $start, true, 303);
     exit;
 });
 
