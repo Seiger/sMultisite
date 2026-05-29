@@ -1,8 +1,8 @@
 {
   "name": "seiger/smultisite",
-  "license": "GPL-3.0",
-  "type": "evolutioncms-tool",
-  "description": "Evocms package for collection of Multisite Tools for Evolution CMS.",
+  "license": "GPL-3.0-or-later",
+  "type": "evolution-cms-module",
+  "description": "Multisite and multi-domain management module for Evolution CMS.",
   "keywords": [
     "evocms",
     "evolution-cms",
@@ -20,7 +20,8 @@
     }
   ],
   "require": {
-    "php": "^8.2"
+    "php": "^8.3",
+    "evolution-cms/evolution": "^3.5"
   },
   "autoload": {
     "psr-4": {
@@ -31,10 +32,7 @@
     "laravel": {
       "providers": [
         "Seiger\\sMultisite\\sMultisiteServiceProvider"
-      ],
-      "aliases": {
-        "sMultisite": "Seiger\\sMultisite\\Facades\\sMultisite"
-      }
+      ]
     }
   },
   "config": {

@@ -1,6 +1,7 @@
 <?php namespace Seiger\sMultisite;
 
 use EvolutionCMS\Facades\Console;
+use EvolutionCMS\AliasLoader;
 use EvolutionCMS\ServiceProvider;
 use Illuminate\Support\Facades\Log;
 use Seiger\sMultisite\Console\PublishAssets;
@@ -39,12 +40,6 @@ class sMultisiteServiceProvider extends ServiceProvider
 
         // Merge configuration for sMultisite
         $this->mergeConfigFrom(dirname(__DIR__) . '/config/sMultisiteCheck.php', 'cms.settings');
-
-        // Register sGallery as a singleton using the key 'sGallery'
-        $this->app->singleton('sMultisite', fn($app) => new sMultisite());
-
-        // Create class alias for the facade
-        class_alias(sMultisiteFacade::class, 'sMultisite');
 
         // Update active css and js and correcting version
         if ($this->app->runningInConsole()) {
@@ -86,6 +81,10 @@ class sMultisiteServiceProvider extends ServiceProvider
     {
         // Add plugins to Evolution CMS
         $this->loadPluginsFrom(dirname(__DIR__) . '/plugins/');
+        $this->app->singleton(sMultisite::class);
+        $this->app->alias(sMultisite::class, 'sMultisite');
+
+        AliasLoader::getInstance()->alias('sMultisite', sMultisiteFacade::class);
     }
 
     /**
