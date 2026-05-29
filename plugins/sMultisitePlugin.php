@@ -20,8 +20,29 @@
 use EvolutionCMS\Facades\UrlProcessor;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Schema;
 use Seiger\sCommerce\Facades\sCommerce;
 use Seiger\sMultisite\Facades\sMultisite;
+
+if (!function_exists('ms_multisite_table_ready')) {
+    /**
+     * Check whether the package table is available before querying it.
+     *
+     * During CLI package installation the plugin can be booted before its
+     * migrations have created the table. SQLite fails immediately in that
+     * state, so runtime listeners must stay in default-mode until migrations
+     * finish.
+     *
+     * @return bool
+     */
+    function ms_multisite_table_ready(): bool {
+        try {
+            return Schema::hasTable('s_multisites');
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+}
 
 // Load SSO functions if needed
 if (!function_exists('ms_sso_load_functions')) {
@@ -191,6 +212,9 @@ Event::listen('evolution.OnLoadSettings', function($params) {
     evo()->setConfig('site_key', 'default');
     evo()->setConfig('site_root', 0);
     evo()->setConfig('site_color', '#60a5fa');
+    if (!ms_multisite_table_ready()) {
+        return;
+    }
     $domain = \Seiger\sMultisite\Models\sMultisite::whereDomain($host)->whereActive(1)->first();
     if ($domain) {
         evo()->setConfig('site_key', $domain->key);
@@ -242,6 +266,9 @@ Event::listen('evolution.OnWebPageInit', function () {
  * @return string|null Prefixed URL for Manager context, otherwise null to keep default behavior
  */
 Event::listen('evolution.OnMakeDocUrl', function($params) {
+    if (!ms_multisite_table_ready()) {
+        return null;
+    }
     if (evo()->isBackend()) {
         $roots = evo()->getParentIds($params['id']);
         if (count($roots)) {
@@ -285,6 +312,9 @@ Event::listen('evolution.OnMakePageCacheKey', function($params) {
  * @return void
  */
 Event::listen('evolution.OnCacheUpdate', function($params) {
+    if (!ms_multisite_table_ready()) {
+        return;
+    }
     sMultisite::domainsTree();
 });
 
@@ -347,6 +377,9 @@ Event::listen('evolution.OnManagerMenuPrerender', function($params) {
  * @return void
  */
 Event::listen('evolution.OnManagerLogin', function () {
+    if (!ms_multisite_table_ready()) {
+        return;
+    }
     ms_sso_load_functions();
 
     if (session_status() !== PHP_SESSION_ACTIVE) @session_start();
@@ -419,6 +452,9 @@ Event::listen('evolution.OnManagerLogin', function () {
  * @return void
  */
 Event::listen('evolution.OnManagerLogout', function () {
+    if (!ms_multisite_table_ready()) {
+        return;
+    }
     ms_sso_load_functions();
 
     $canon = function($h) {
@@ -523,6 +559,9 @@ Event::listen('evolution.OnManagerPageInit', function () {
  * @return void
  */
 Event::listen('evolution.OnManagerTreePrerender', function($params) {
+    if (!ms_multisite_table_ready()) {
+        return;
+    }
     $domain = \Seiger\sMultisite\Models\sMultisite::where('key', 'default')->first();
     if ($domain) {
         evo()->setConfig('site_key', $domain->key);
@@ -546,6 +585,9 @@ Event::listen('evolution.OnManagerTreePrerender', function($params) {
  * @return string|null HTML markup for extra roots, or null to keep default behavior
  */
 Event::listen('evolution.OnManagerTreeRender', function($params) {
+    if (!ms_multisite_table_ready()) {
+        return null;
+    }
     $tree = '';
     $_style = ManagerTheme::getStyle();
     $domains = \Seiger\sMultisite\Models\sMultisite::where('hide_from_tree', 0)->whereNot('key', 'default')->get();
@@ -582,6 +624,9 @@ Event::listen('evolution.OnManagerTreeRender', function($params) {
  * @return string|null Serialized placeholders, or null to keep default behavior
  */
 Event::listen('evolution.OnManagerNodePrerender', function($params) {
+    if (!ms_multisite_table_ready()) {
+        return null;
+    }
     $domains = \Seiger\sMultisite\Models\sMultisite::where('hide_from_tree', 0)->get();
     if ($domains) {
         $_style = ManagerTheme::getStyle();
@@ -636,6 +681,9 @@ Event::listen('evolution.OnManagerNodePrerender', function($params) {
  * @return string|null Blank string to hide, or null to keep default behavior
  */
 Event::listen('evolution.OnManagerNodeRender', function($params) {
+    if (!ms_multisite_table_ready()) {
+        return null;
+    }
     $domains = \Seiger\sMultisite\Models\sMultisite::all();
     if ($domains) {
         $multisiteResources = $domains->pluck('resource')->toArray();
