@@ -633,9 +633,9 @@ Event::listen('evolution.OnManagerNodePrerender', function($params) {
         $startResources = $domains->pluck('site_start')->toArray();
         $errorResources = $domains->pluck('error_page')->toArray();
         $unauthorizedResources = $domains->pluck('unauthorized_page')->toArray();
+        $rootCategoryResources = [];
 
         if (evo()->getConfig('check_sCommerce', false)) {
-            $rootCategoryResources =  [];
             foreach (sCommerce::config('basic', []) as $name => $id) {
                 if (str_starts_with($name, 'catalog_root')) {
                     $rootCategoryResources[] = $id;
