@@ -5,13 +5,11 @@ use Seiger\sMultisite\Models\sMultisite;
 
 class SsoController
 {
-    public function handle(Request $request, string $endpoint = '')
+    public function handle(Request $request)
     {
         $this->loadFunctions();
 
-        if ($endpoint === '') {
-            $endpoint = (string) $request->route('ssoEndpoint', '');
-        }
+        $endpoint = (string) $request->route('ssoEndpoint', '');
 
         if (!in_array($endpoint, ['_ms-run', '_ms-run-logout', '_ms-sso', '_ms-sso-logout'], true)) {
             abort(404);
