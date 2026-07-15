@@ -371,8 +371,8 @@ Event::listen('evolution.OnManagerMenuPrerender', function($params) {
  * Manager page event after login.
  *
  * Notes:
- * - Uses current session_id() as SID value to propagate.
- * - Tokens are short-lived and include mode/login, sid, and host.
+ * - Propagates both Laravel and native PHP session identifiers.
+ * - Includes the Manager user ID so the receiver can create a local session.
  *
  * @return void
  */
@@ -427,7 +427,7 @@ Event::listen('evolution.OnManagerLogin', function () {
     $runId = rtrim(strtr(base64_encode(random_bytes(12)), '+/', '-_'), '=');
     ms_run_put($runId, ['home' => $canon($home), 'steps' => $steps], 300);
 
-    error_log('[sMultisite SSO] LOGIN runId=' . $runId . ' steps_count=' . count($steps) . ' home=' . $canon($home) . ' sid=' . $sid . ' sid_native=' . $nativeSid . ' uid=' . $uid);
+    error_log('[sMultisite SSO] LOGIN runId=' . $runId . ' steps_count=' . count($steps) . ' home=' . $canon($home) . ' uid=' . $uid);
     $_SESSION['ms_run_login'] = $runId;
 
     // Ensure stale logout run does not cancel fresh login propagation.
@@ -442,8 +442,8 @@ Event::listen('evolution.OnManagerLogin', function () {
  * OnManagerLogout
  *
  * Builds a "run plan" to logout on other domains.
- * Stores runId in a cookie so we can start from the next authenticated Manager
- * page event (session may be gone).
+ * Stores runId in a cookie so the next Manager render event can start the run
+ * after the local session has been destroyed.
  *
  * Notes:
  * - Tokens are short-lived and include mode/logout and host.

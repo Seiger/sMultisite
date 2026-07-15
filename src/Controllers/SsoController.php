@@ -128,7 +128,7 @@ class SsoController
         $this->setSidCookies($legacySid, $laravelSid);
         $return = $this->safeReturn((string) $request->query('return', '/'));
 
-        error_log('[sMultisite SSO] RECEIVER login ok host=' . $this->currentHost() . ' uid=' . $uid . ' local=' . ($didLocalLogin ? '1' : '0') . ' sid=' . $laravelSid . ' sid_native=' . $legacySid . ' return=' . $return);
+        error_log('[sMultisite SSO] RECEIVER login ok host=' . $this->currentHost() . ' uid=' . $uid . ' local=' . ($didLocalLogin ? '1' : '0') . ' return=' . $return);
 
         return redirect()->away($return, 303)
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate')
