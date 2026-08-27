@@ -400,6 +400,7 @@ Event::listen('evolution.OnManagerLogin', function () {
     };
 
     $targets = \Seiger\sMultisite\Models\sMultisite::query()
+        ->whereActive(1)
         ->pluck('domain')
         ->filter()
         ->map($canon)
@@ -466,6 +467,7 @@ Event::listen('evolution.OnManagerLogout', function () {
     $home = $canon(parse_url((($_SERVER['HTTPS'] ?? '') === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? ''), PHP_URL_HOST));
 
     $targets = \Seiger\sMultisite\Models\sMultisite::query()
+        ->whereActive(1)
         ->pluck('domain')->filter()->map($canon)->unique()
         ->reject(fn($h) => $h === $home || $h === '')->values()->all();
 

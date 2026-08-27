@@ -28,12 +28,19 @@ class CreateSMultisitesTable extends Migration
             $table->timestamps();
         });
 
+        // Console migrations have no HTTP_HOST, so fall back to the configured site URL.
+        $domain = trim((string)($_SERVER['HTTP_HOST'] ?? ''));
+        if ($domain === '') {
+            $siteUrl = (string)evo()->getConfig('site_url', '');
+            $domain = (string)(parse_url($siteUrl, PHP_URL_HOST) ?: '');
+        }
+
         // Seed default domain
         $default = [
             'active' => 1,
             'resource' => 0,
             'key' => 'default',
-            'domain' => get_by_key($_SERVER, 'HTTP_HOST', 'localhost'),
+            'domain' => $domain,
             'site_name' => evo()->getConfig('site_name', 'Default'),
             'site_start' => evo()->getConfig('site_start', 1),
             'error_page' => evo()->getConfig('error_page', 1),
