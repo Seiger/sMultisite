@@ -16,16 +16,22 @@ use Seiger\sMultisite\Models\sMultisite as SMultisiteModel;
 class sMultisite
 {
     /**
-     * Show all active domains.
+     * Return the default site and all active multisite domains.
      *
-     * @return array
+     * HTTP requests use the current host to identify the active domain. Console
+     * commands have no request host, so they use localhost as a neutral fallback
+     * while the default site remains current.
+     *
+     * @return array<string, array{key: string, link: string, site_name: string, is_current: bool}>
      */
     public function domains(): array
     {
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
         // Initialize the default domain
         $domains['default'] = [
             'key' => 'default',
-            'link' => $this->scheme(evo()->getConfig('server_protocol', 'https') . '://' . $_SERVER['HTTP_HOST']),
+            'link' => $this->scheme(evo()->getConfig('server_protocol', 'https') . '://' . $host),
             'site_name' => evo()->getConfig('site_name', 'Evolution CMS'),
             'is_current' => true,
         ];
@@ -39,7 +45,7 @@ class sMultisite
                 'key' => $item->key,
                 'link' => $this->scheme(evo()->getConfig('server_protocol', 'https') . '://' . $item->domain),
                 'site_name' => $item->site_name,
-                'is_current' => ($_SERVER['HTTP_HOST'] === $item->domain),
+                'is_current' => ($host === $item->domain),
             ];
         }
 
