@@ -32,14 +32,21 @@ if (!function_exists('ms_multisite_table_ready')) {
      * migrations have created the table. SQLite fails immediately in that
      * state, so runtime listeners must stay in default-mode until migrations
      * finish.
+     * The result is memoized for the current PHP request to avoid repeated
+     * information_schema queries from product-card rendering.
      *
      * @return bool
      */
     function ms_multisite_table_ready(): bool {
+        static $ready;
+        if (isset($ready)) {
+            return $ready;
+        }
+
         try {
-            return Schema::hasTable('s_multisites');
+            return $ready = Schema::hasTable('s_multisites');
         } catch (\Throwable) {
-            return false;
+            return $ready = false;
         }
     }
 }
