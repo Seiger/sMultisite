@@ -1,6 +1,5 @@
 <?php namespace Seiger\sMultisite;
 
-use EvolutionCMS\Facades\UrlProcessor;
 use EvolutionCMS\Models\SiteContent;
 use Illuminate\Support\Facades\Cache;
 use Seiger\sCommerce\Facades\sCommerce;
@@ -9,7 +8,8 @@ use Seiger\sMultisite\Models\sMultisite as SMultisiteModel;
 /**
  * Class sMultisite
  *
- * Provides methods for managing multisite configurations.
+ * Provides domain navigation and rebuilds the frontend resource maps per domain.
+ * Resource paths are resolved from their ancestry rather than database row order.
  *
  * @package Seiger\sMultisite
  */
@@ -110,27 +110,16 @@ class sMultisite
     }
 
     /**
-     * Update resources tree with domains and cache the results.
+     * Rebuild the frontend URL and resource-access maps for every domain.
+     *
+     * Resolve all resource paths before replacing cached maps, so moved resources
+     * remain addressable even when their parent was created after them.
      *
      * @return void
      */
     public function domainsTree(): void
     {
-        $resources = SiteContent::all();
-        foreach ($resources as $row) {
-            if ((bool)evo()->getConfig('use_alias_path') && $row->parent > 0) {
-                $parent = $row->parent;
-                $path = $allAliases[$parent];
-
-                while (isset(UrlProcessor::getFacadeRoot()->aliasListing[$parent]) && (int)UrlProcessor::getFacadeRoot()->aliasListing[$parent]['alias_visible'] === 0) {
-                    $path = UrlProcessor::getFacadeRoot()->aliasListing[$parent]['path'];
-                    $parent = UrlProcessor::getFacadeRoot()->aliasListing[$parent]['parent'];
-                }
-                $allAliases[$row->getKey()] = $path . '/' . $row->alias;
-            } else {
-                $allAliases[$row->getKey()] = $row->alias;
-            }
-        }
+        $allAliases = $this->resourceAliases(SiteContent::all(), (bool)evo()->getConfig('use_alias_path'));
 
         $domains = SMultisiteModel::all();
         $multisiteResources = $domains->pluck('resource')->toArray();
@@ -164,5 +153,58 @@ class sMultisite
             Cache::forget('sMultisite-' . $domain->key . '-resources');
             Cache::rememberForever('sMultisite-' . $domain->key . '-resources', fn() => $aliases);
         }
+    }
+
+    /**
+     * Resolve resource paths independently of the order returned by the database.
+     *
+     * Hidden ancestors are omitted from descendant URLs, while their own resource
+     * alias remains addressable. Invalid ancestry aborts the rebuild before any
+     * domain cache is replaced rather than publishing truncated paths.
+     *
+     * @param iterable<SiteContent> $resources Complete resource tree, including domain containers.
+     * @param bool $useAliasPath Whether friendly URLs include visible ancestors.
+     * @return array<int, string> Full path indexed by resource ID.
+     * @throws \LogicException When ancestry is cyclic or references a missing resource.
+     * @since 1.2.0
+     */
+    protected function resourceAliases(iterable $resources, bool $useAliasPath): array
+    {
+        $byId = [];
+        foreach ($resources as $resource) {
+            $byId[(int)$resource->getKey()] = $resource;
+        }
+
+        $aliases = [];
+        $resolving = [];
+        $resolve = function (int $id) use (&$resolve, &$aliases, &$resolving, $byId, $useAliasPath): string {
+            if (array_key_exists($id, $aliases)) {
+                return $aliases[$id];
+            }
+            if (isset($resolving[$id]) || !isset($byId[$id])) {
+                throw new \LogicException('Cannot resolve resource ancestry for ID ' . $id);
+            }
+
+            $resolving[$id] = true;
+            $resource = $byId[$id];
+            $path = '';
+            $parent = (int)$resource->parent;
+            if ($useAliasPath && $parent > 0) {
+                $path = $resolve($parent);
+                while ($parent > 0 && (int)($byId[$parent]->alias_visible ?? 1) === 0) {
+                    $parent = (int)$byId[$parent]->parent;
+                    $path = $parent > 0 ? $resolve($parent) : '';
+                }
+            }
+
+            unset($resolving[$id]);
+            return $aliases[$id] = ($path === '' ? '' : $path . '/') . (string)$resource->alias;
+        };
+
+        foreach (array_keys($byId) as $id) {
+            $resolve($id);
+        }
+
+        return $aliases;
     }
 }
