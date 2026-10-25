@@ -32,21 +32,17 @@ if (!function_exists('ms_multisite_table_ready')) {
      * migrations have created the table. SQLite fails immediately in that
      * state, so runtime listeners must stay in default-mode until migrations
      * finish.
-     * The result is memoized for the current PHP request to avoid repeated
-     * information_schema queries from product-card rendering.
+     * Positive checks use a database-scoped shared cache invalidated by
+     * migrations and cache flush. Missing tables are never cached, so
+     * installation can create the table and retry in the same PHP process.
      *
      * @return bool
      */
     function ms_multisite_table_ready(): bool {
-        static $ready;
-        if (isset($ready)) {
-            return $ready;
-        }
-
         try {
-            return $ready = Schema::hasTable('s_multisites');
+            return \Seiger\sMultisite\Support\ActiveDomainCache::tableReady();
         } catch (\Throwable) {
-            return $ready = false;
+            return false;
         }
     }
 }
@@ -212,7 +208,7 @@ if (!function_exists('ms_sso_current_session_id')) {
  * @return void
  */
 Event::listen('evolution.OnLoadSettings', function($params) {
-    $host = $_SERVER['HTTP_HOST'];
+    $host = $_SERVER['HTTP_HOST'] ?? null;
     if (isset($params['config']['setHost']) && trim($params['config']['setHost']) !== '') {
         $host = trim($params['config']['setHost']);
     }
@@ -222,7 +218,7 @@ Event::listen('evolution.OnLoadSettings', function($params) {
     if (!ms_multisite_table_ready()) {
         return;
     }
-    $domain = \Seiger\sMultisite\Models\sMultisite::whereDomain($host)->whereActive(1)->first();
+    $domain = \Seiger\sMultisite\Support\ActiveDomainCache::find($host);
     if ($domain) {
         evo()->setConfig('site_key', $domain->key);
         evo()->setConfig('site_name', $domain->site_name);

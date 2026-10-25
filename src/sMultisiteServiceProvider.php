@@ -73,12 +73,14 @@ class sMultisiteServiceProvider extends ServiceProvider
     /**
      * Register bindings and services in the container.
      *
-     * This method is used to bind classes or interfaces into the service container.
+     * Bindings retain the existing package lifecycle; domain cache invalidation observes
+     * writes from manager, frontend, migrations and CLI before plugins run.
      *
      * @return void
      */
     public function register()
     {
+        \Seiger\sMultisite\Support\ActiveDomainCache::listen($this->app['events']);
         // Add plugins to Evolution CMS
         $this->loadPluginsFrom(dirname(__DIR__) . '/plugins/');
         $this->app->singleton(sMultisite::class);
