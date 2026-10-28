@@ -240,10 +240,15 @@ Event::listen('evolution.OnLoadSettings', function($params) {
  * Enforces resource access per domain on the front-end:
  * - Compares evo()->documentIdentifier against cached allowed resource IDs for the current site_key.
  * - Whitelists SSO service endpoints to avoid accidental 404 / access blocks.
+ * - Leaves API entrypoints without an HTTP request binding outside page access checks.
  *
  * @return void
  */
 Event::listen('evolution.OnWebPageInit', function () {
+    if (!app()->bound('request')) {
+        return;
+    }
+
     $uri = strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
     $suffix = (string) evo()->getConfig('friendly_url_suffix', '');
     $path = $uri;
